@@ -1,7 +1,7 @@
 import React, { useState, Fragment, useEffect } from "react";
 import "../../App.css";
 import Plot from "react-plotly.js";
-import { Button } from "semantic-ui-react";
+// import { Button } from "semantic-ui-react";
 
 var mqtt = require("mqtt");
 var options = {
@@ -16,14 +16,12 @@ var options = {
 };
 
 var start_time = Date();
-var client = mqtt.connect("mqtt://192.168.43.81:9001", options);
 
-client.subscribe("esp32/temperature");
-console.log(client);
-console.log("Client subscribed ");
+// console.log(client);
+// console.log("Client subscribed ");
 
-var count = 50;
-var ymax = 50;
+var count = 100;
+var ymax = 100;
 
 var startingNumbers = Array(count)
   .fill(1)
@@ -38,29 +36,21 @@ export default function History() {
   const [stop, setStop] = useState(true);
   const [save, setSave] = useState(true);
   const [note, setNote] = useState("#");
-  var [data, setData] = React.useState({
+  const [data, setData] = useState([]);
+  const [dataGraph, setDataGraph] = useState({
     x: startingNumbers,
     y: startingNumbersy,
   });
+  const [current_time, setCurrent_time] = useState(start_time);
+
+  // console.log("data : ", data.length, data);
 
   // Sets default React state
-  var [msg, setMsg] = useState(
-    <Fragment>
-      <em>...</em>
-    </Fragment>
-  );
-
-  var [current_time, setCurrent_time] = useState(start_time);
-
-  client.on("message", function (topic, message) {
-    // note = message.toString();
-    setNote(message.toString());
-    // ymax = ymax < message ? message : ymax;
-    // count =
-    // Updates React state with message
-    // setMsg(note, 1000);
-    // console.log(note);
-  });
+  // var [msg, setMsg] = useState(
+  //   <Fragment>
+  //     <em>...</em>
+  //   </Fragment>
+  // );
 
   const stopHandler = () => {
     setStop(!stop);
@@ -70,45 +60,81 @@ export default function History() {
     setSave(!save);
   };
 
+  const client = mqtt.connect("mqtt://192.168.1.19:9001", options);
+  client.on("connect", () => {
+    console.log("connected");
+    client.subscribe("esp32/temperature");
+  });
   useEffect(() => {
-    const interval = setInterval(() => {
-      // if (stop) setMsg(note);
-      setData((prev) => {
+    client.on("message", function (topic, message) {
+      // note = message.toString();
+      const itemMessage = message.toString();
+      console.log("itemMessage: ", itemMessage);
+      console.log(count);
+
+      setData((currentData) => {
+        // Create an array with a new reference.
+        // Without a new reference react assumes there is no change to the array.
+        let array = [...currentData];
+
+        if (currentData.length < 50) {
+          array.push(itemMessage);
+        } else {
+          array = [...currentData.slice(1), itemMessage];
+        }
+
+        return array;
+      });
+
+      setDataGraph((prev) => {
         return {
-          //   x: prev.x,
-          // x: stop ? [...prev.x, new Date().toLocaleTimeString()] : [...prev.x],
-          // y: [...prev.y, note],
-          x: stop ? [...prev.x.slice(1), (count += 1)] : [...prev.x],
-          y: stop ? [...prev.y.slice(1), note] : [...prev.y],
+          x: stop ? [...prev.x.slice(1), count++] : [...prev.x],
+          y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
+          // xaxis: { range: count < 50 ? [0, count] : [count - 50, count] },
+          // yaxis: { range: [0, note] },
         };
       });
-      if (stop) setCurrent_time(Date());
-    }, 0.008681);
 
-    return () => {
-      clearInterval(interval);
-    };
+      setNote(itemMessage);
+      // ymax = ymax < message ? message : ymax;
+      // count =
+      // Updates React state with message
+      // setMsg(note, 1000);
+      // console.log(note);
+    });
+    // const interval = setInterval(() => {
+    //   // if (stop) setMsg(note);
+    //
+    //   if (stop) setCurrent_time(Date());
+    //   // console.log(current_time - prev_time);
+    //   // if (stop) setPrev_time(current_time);
+    // }, 0.008);
+
+    // return () => {
+    //   clearInterval(interval);
+    // };
+    // return () => {
+    //   client.end();
+    // };
   }, [note, stop]);
   return (
     <div className="temp">
       <h1>Perfomance History Dashboard</h1>
+
       <button className="button button-33" onClick={stopHandler}>
         {stop ? "Stop" : "Run"}
       </button>
-
       <button class="button button-33" onClick={saveHandler}>
         {save ? "Saving..." : "Save"}
       </button>
-
       <p>Temperature is: {note}&deg;C</p>
       <div className="time_heading">
-        <h4 className="">Start Time : {start_time}</h4>
+        <h4>Start Time : {start_time}</h4>
         <h4>Current Time : {current_time}</h4>
       </div>
-
       <div className="plot">
         <Plot
-          data={[data]}
+          data={[dataGraph]}
           layout={{
             height: "30vh",
             width: "50vh",
