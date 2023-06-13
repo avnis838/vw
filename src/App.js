@@ -17,14 +17,6 @@ function App() {
     <div className="App">
       <div className="heading">
         <p>VoltWorks Limited</p>
-        <Button
-          className="button"
-          inverted
-          color="blue"
-          circular
-          icon="refresh"
-          onClick={refresh}
-        />
       </div>
       <BrowserRouter>
         <nav>
@@ -40,6 +32,7 @@ function App() {
             </li>
           </ul>
         </nav>
+
         <Switch>
           <Route exact path="/">
             <Home />
@@ -50,8 +43,11 @@ function App() {
           <Route path="/window">
             <Window />
           </Route>
-          <Route path="/connect">
+          {/* <Route path="/connect">
             <Wifi_connect />
+          </Route> */}
+          <Route path="/window">
+            <Window />
           </Route>
         </Switch>
       </BrowserRouter>
