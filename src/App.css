@@ -68,6 +68,7 @@
 }
 
 .plot {
+  /* margin-left: auto; */
   width: 100vh;
   display: flex;
   margin-bottom: 20;
@@ -96,6 +97,7 @@
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  margin: 10px
 }
 
 .button-33:hover {
@@ -168,4 +170,24 @@
 
 .title_head {
   font-size: 5vh;
+}
+
+/*  */
+.Nav {
+  margin-bottom: 20px;
+}
+
+.Navbrand {
+  padding-left: 100px;
+  color: aquamarine;
+
+}
+
+.vsgap {
+  margin: px
+}
+
+.elements {
+  align-items: center;
+  justify-content: center;
 }

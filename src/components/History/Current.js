@@ -45,12 +45,12 @@ const Current = () => {
     setSave(!save);
   };
 
-  const client = mqtt.connect("mqtt://192.168.1.22:9001", options);
-  client.on("connect", () => {
-    console.log("connected");
-    client.subscribe("esp32/current");
-  });
   useEffect(() => {
+    const client = mqtt.connect("mqtt://192.168.1.25:9001", options);
+    client.on("connect", () => {
+      console.log("connected");
+      client.subscribe("esp32/current");
+    });
     client.on("message", function (topic, message) {
       // note = message.toString();
       const itemMessage = message.toString();
@@ -66,7 +66,10 @@ const Current = () => {
 
       if (stop) setCurrent_time(Date());
     });
-  }, [note, stop, client]);
+    return () => {
+      client.end();
+    };
+  }, []);
 
   return (
     <div className="temp">

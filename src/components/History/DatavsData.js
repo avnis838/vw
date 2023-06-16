@@ -92,16 +92,16 @@ const DatavsData = () => {
     else if (e === "Current") setyunit("mA");
   };
 
-  const client = mqtt.connect("mqtt://192.168.1.22:9001", options);
-  client.on("connect", () => {
-    console.log("connected");
-    topiclink.forEach((x, i) => {
-      client.subscribe(x);
-    });
-  });
   var itemMessagex = "",
     itemMessagey = "";
   useEffect(() => {
+    const client = mqtt.connect("mqtt://192.168.1.25:9001", options);
+    client.on("connect", () => {
+      console.log("connected");
+      topiclink.forEach((x, i) => {
+        client.subscribe(x);
+      });
+    });
     client.on("message", function (topic, message) {
       // note = message.toString();
 
@@ -141,7 +141,11 @@ const DatavsData = () => {
 
       if (stop) setCurrent_time(Date());
     });
-  }, [stop, topiclink, topics, valuex, valuey]);
+
+    return () => {
+      client.end();
+    };
+  }, []);
 
   return (
     <div className="temp">

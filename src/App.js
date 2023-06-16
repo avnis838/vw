@@ -6,6 +6,12 @@ import History from "./components/History/History.js";
 import Window from "./components/Window/Window.js";
 import Wifi_connect from "./components/Wifi_authentication/Wifi_connect.js";
 import { Home } from "./Home";
+import Navbar from "../src/components/Navbar/NavBar.js";
+import "bootstrap/dist/css/bootstrap.min.css";
+import Footer from "./components/Navbar/Footer";
+{
+  /* The following line can be included in your src/index.js or App.js file */
+}
 // import "semantic-ui-css/semantic.min.css";
 
 const refresh = () => {
@@ -15,41 +21,9 @@ const refresh = () => {
 function App() {
   return (
     <div className="App">
-      <div className="heading">
-        <p>VoltWorks Limited</p>
-      </div>
       <BrowserRouter>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/history">History</Link>
-            </li>
-            <li>
-              <Link to="/window">Window</Link>
-            </li>
-            <li>
-              <Link to="/connect">Wifi_connect</Link>
-            </li>
-          </ul>
-        </nav>
-
-        <Switch>
-          <Route exact path="/">
-            <Home />
-          </Route>
-          <Route path="/history">
-            <History />
-          </Route>
-          <Route path="/window">
-            <Window />
-          </Route>
-          {/* <Route path="/connect">
-            <Wifi_connect />
-          </Route> */}
-          <Route path="/window">
-            <Window />
-          </Route>
-        </Switch>
+        <Navbar />
+        <Footer />
       </BrowserRouter>
     </div>
   );

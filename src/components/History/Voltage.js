@@ -43,12 +43,12 @@ const Voltage = () => {
     setSave(!save);
   };
 
-  const client = mqtt.connect("mqtt://192.168.1.22:9001", options);
-  client.on("connect", () => {
-    console.log("connected");
-    client.subscribe("esp32/voltage");
-  });
   useEffect(() => {
+    const client = mqtt.connect("mqtt://192.168.1.25:9001", options);
+    client.on("connect", () => {
+      console.log("connected");
+      client.subscribe("esp32/voltage");
+    });
     client.on("message", function (topic, message) {
       // note = message.toString();
       const itemMessage = message.toString();
@@ -64,7 +64,10 @@ const Voltage = () => {
 
       if (stop) setCurrent_time(Date());
     });
-  }, [note, stop, client]);
+    return () => {
+      client.end();
+    };
+  }, []);
   return (
     <div className="temp">
       <h1 className="title_head">Perfomance Voltage Dashboard</h1>
