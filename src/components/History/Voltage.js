@@ -12,7 +12,7 @@ var options = {
 };
 
 var start_time = Date();
-
+var countd = 50;
 var count = 50;
 var ymax = 50;
 
@@ -30,6 +30,11 @@ const Voltage = () => {
   const [note, setNote] = useState("#");
 
   const [dataGraph, setDataGraph] = useState({
+    x: startingNumbers,
+    y: startingNumbersy,
+  });
+
+  const [data, setData] = useState({
     x: startingNumbers,
     y: startingNumbersy,
   });
@@ -53,14 +58,13 @@ const Voltage = () => {
       // note = message.toString();
       const itemMessage = message.toString();
 
-      setDataGraph((prev) => {
+      setData((prev) => {
         return {
-          x: stop ? [...prev.x.slice(1), count++] : [...prev.x],
-          y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
+          x: stop ? [...prev.x, countd++] : [...prev.x],
+          y: stop ? [...prev.y, itemMessage] : [...prev.y],
+          // mode: "lines+markers",
         };
       });
-
-      setNote(itemMessage);
 
       if (stop) setCurrent_time(Date());
     });
@@ -68,6 +72,26 @@ const Voltage = () => {
       client.end();
     };
   }, []);
+
+  useEffect(() => {
+    // if (data) {
+    const interval = setInterval(() => {
+      // console.log(data.x.length);
+      setDataGraph((prev) => {
+        return {
+          x: stop ? [...prev.x.slice(1), ++count] : [...prev.x],
+          y: stop ? [...prev.y.slice(1), data.y[count]] : [...prev.y],
+          mode: "lines+markers",
+        };
+      });
+      setNote(data.y[count]);
+    }, 50);
+
+    // console.log("ererter");
+    return () => clearInterval(interval);
+    // }
+  }, [data]);
+
   return (
     <div className="temp">
       <h1 className="title_head">Perfomance Voltage Dashboard</h1>

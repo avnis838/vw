@@ -131,7 +131,7 @@ const DatavsData = () => {
           x: stop ? [...prev.x, itemMessagex] : [...prev.x],
           y: stop ? [...prev.y, itemMessagey] : [...prev.y],
           z: stop ? [...prev.z, count++] : [...prev.z],
-          mode: "markers",
+          mode: "lines+markers",
           type: "scatter3d",
         };
       });
