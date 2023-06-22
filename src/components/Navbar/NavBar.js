@@ -7,6 +7,7 @@ import Window from "../Window/Window.js";
 // import Wifi_connect from "./components/Wifi_authentication/Wifi_connect.js";
 import { Home } from "../../Home";
 import "../../App.css";
+import logo from "../../utils/vw_logo (1).jpg";
 
 export default class NavBar extends Component {
   render() {
@@ -14,6 +15,7 @@ export default class NavBar extends Component {
       <Router>
         <div>
           <Navbar bg="dark" variant="dark" className="Nav">
+            <img src={logo} alt="Logo" className="pad" />
             <Navbar.Brand href="/" className="Navbrand">
               VoltWorks
             </Navbar.Brand>

@@ -178,7 +178,7 @@
 }
 
 .Navbrand {
-  padding-left: 100px;
+  padding-left: 10px;
   color: aquamarine;
 
 }
@@ -190,4 +190,8 @@
 .elements {
   align-items: center;
   justify-content: center;
+}
+
+.pad {
+  margin-left: 2vh;
 }

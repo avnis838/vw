@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useWorker, WORKER_STATUS } from "@koale/useworker";
 import "../../App.css";
 import Plot from "react-plotly.js";
+import worker_script from "./worker.js";
+
 // import Current from "./Current.js";
 
 var mqtt = require("mqtt");
@@ -18,6 +20,7 @@ var start_time = Date();
 
 var count = 50;
 var countd = 50;
+var allEntries = [,];
 var ymax = 50;
 
 var startingNumbers = Array(count)
@@ -29,8 +32,9 @@ var startingNumbersy = Array(ymax)
   .map((_, i) => i);
 const Current = () => {
   const [stop, setStop] = useState(true);
-  const [save, setSave] = useState(true);
+  const [save, setSave] = useState(false);
   const [note, setNote] = useState("#");
+  const myWorker = new Worker(worker_script, { type: "module" });
 
   const [dataGraph, setDataGraph] = useState({
     x: startingNumbers,
@@ -47,12 +51,75 @@ const Current = () => {
     setStop(!stop);
   };
 
+  const nonBlockingExport = (data) => {
+    // clickStart = new Date().getTime();
+    getCSV(data);
+  };
+  const getCSV = (data) => {
+    console.log("Formatting csv...");
+    workerMaker("csvFormat", data);
+  };
+
+  const getBlob = (csvFile) => {
+    console.log("creating blob...");
+    workerMaker("blobber", csvFile);
+  };
+  const workerMaker = (type, arg) => {
+    // check if a Worker has been defined before calling postMessage with specified arguments
+    if (window.Worker) {
+      myWorker.postMessage({ type, arg });
+    }
+  };
+
+  const saveFile = (blob) => {
+    const uniqTime = new Date().getTime();
+    const filename = `my_file_${uniqTime}`;
+    if (navigator.msSaveBlob) {
+      // IE 10+
+      console.info("Starting call for " + "ie download");
+      const ieFilename = `${filename}.csv`;
+      navigator.msSaveBlob(blob, ieFilename);
+    } else {
+      console.info(`Starting call for html5 download`);
+      const link = document.createElement("a");
+      if (link.download !== undefined) {
+        // feature detection
+        // Browsers that support HTML5 download attribute
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  };
+
+  myWorker.onmessage = function (e) {
+    console.log("Message received from worker");
+    const response = e.data;
+    const data = response.data;
+    const type = response.type;
+    if (type === "csvFormat") {
+      getBlob(data);
+    } else if (type === "blobber") {
+      saveFile(data);
+    } else {
+      console.error("An Invalid type has been passed in");
+    }
+  };
   const saveHandler = () => {
     setSave(!save);
+    if (save) {
+      var data = sessionStorage.getItem("allEntries");
+      nonBlockingExport(data);
+      sessionStorage.clear();
+    }
   };
 
   useEffect(() => {
-    const client = mqtt.connect("mqtt://192.168.1.25:9001", options);
+    const client = mqtt.connect("mqtt://192.168.1.19:9001", options);
     client.on("connect", () => {
       console.log("connected");
       client.subscribe("esp32/current");
@@ -68,6 +135,9 @@ const Current = () => {
           // mode: "lines+markers",
         };
       });
+
+      allEntries.push(itemMessage + "\n");
+      sessionStorage.setItem("allEntries", allEntries);
 
       if (stop) setCurrent_time(Date());
     });
