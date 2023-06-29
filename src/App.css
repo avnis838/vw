@@ -1,5 +1,8 @@
 .App {
   text-align: center;
+  background-color: #282c34;
+  font-family: 'Oxanium',
+    cursive;
 }
 
 .App-logo {
@@ -43,7 +46,7 @@
   flex-direction: column;
   text-align: center;
 
-  font-size: 1vh;
+  font-size: 100px;
 }
 
 .heading {
@@ -53,10 +56,6 @@
   align-items: center;
 }
 
-.temp {
-  align-items: center;
-
-}
 
 .st,
 .et {
@@ -68,22 +67,42 @@
 }
 
 .plot {
+
   /* margin-left: auto; */
-  width: 100vh;
+  background-color: #1e202477;
+
   display: flex;
   margin-bottom: 20;
   align-items: center;
+  justify-content: center;
   flex-direction: row;
+  /* border: 2px solid coral; */
+  /* box-shadow: ; */
 }
+
+@media (max-width: 1200px) {
+  .plot {
+    width: 100vh;
+    display: flex;
+    margin-bottom: 20;
+    align-items: center;
+    /* flex-direction: row; */
+    flex-direction: column;
+  }
+}
+
+
+
+
 
 .button {
   margin: 200;
 }
 
 .button-33 {
-  background-color: #c2fbd7;
+  background-color: #d0f68a;
   border-radius: 100px;
-  box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px;
+  box-shadow: rgba(44, 187, 99, 0.46) 0 -25px 18px -14px inset rgba(18, 55, 32, 0.74) 0 2px 4px, rgba(44, 187, 99, 0.433) 0 4px 8px, rgba(78, 223, 134, 0.603) 0 8px 16px, rgba(69, 181, 112, 0.795) 0 16px 32px;
   color: green;
   cursor: pointer;
   display: inline-block;
@@ -101,7 +120,7 @@
 }
 
 .button-33:hover {
-  box-shadow: rgba(44, 187, 99, .35) 0 -25px 18px -14px inset, rgba(44, 187, 99, .25) 0 1px 2px, rgba(44, 187, 99, .25) 0 2px 4px, rgba(44, 187, 99, .25) 0 4px 8px, rgba(44, 187, 99, .25) 0 8px 16px, rgba(44, 187, 99, .25) 0 16px 32px;
+  box-shadow: rgba(44, 187, 99, 0.46) 0 -25px 18px -14px inset, rgba(9, 32, 18, 0.74) 0 2px 4px, rgba(44, 187, 99, 0.433) 0 4px 8px, rgba(78, 223, 134, 0.603) 0 8px 16px, rgba(69, 181, 112, 0.795) 0 16px 32px;
   transform: scale(1.05) rotate(-1deg);
 }
 
@@ -174,12 +193,48 @@
 
 /*  */
 .Nav {
+
+  /* position: relative; */
+  /* width: 100vw; */
   margin-bottom: 20px;
+  /* border-bottom: 4px solid #48a303; */
+  box-shadow: 0px 4px 4px #7abb01;
+  position: fixed;
+  animation: fireAnimation 2s infinite;
+}
+
+/* @keyframes fireAnimation {
+  0% {
+    box-shadow: 0 0 0 0 #48a303;
+  }
+  
+  50% {
+    box-shadow: 0 0 10px 5px #48a303;
+  }
+  
+  100% {
+    box-shadow: 0 0 0 0 #48a303;
+  }
+} */
+
+
+.element {
+  animation: fireAnimation 2s infinite;
+}
+
+.Nav .nav-link {
+  margin-right: 10px;
+  /* Adjust the spacing as needed */
 }
 
 .Navbrand {
   padding-left: 10px;
+  /* padding-top: ; */
+  padding-top: 1vh;
+  padding-bottom: 1vh;
   color: aquamarine;
+  display: flex;
+  flex-direction: row;
 
 }
 
@@ -193,5 +248,145 @@
 }
 
 .pad {
-  margin-left: 2vh;
+  margin-left: 10vh;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+  height: 6vh;
+  width: 6vh;
+}
+
+.red-letter {
+  /* font-size: x-large; */
+  font-weight: bold;
+  color: #7abb01;
+  position: relative;
+  animation-name: slideIn;
+  animation-duration: 2s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: backwards;
+}
+
+@keyframes slideIn {
+  0% {
+    top: -30px;
+    /* Initial position for 'V' */
+  }
+
+  100% {
+    top: 0;
+    /* Final position for 'V' */
+    color: #7abb01;
+  }
+}
+
+.red-letter.w-letter {
+  animation-name: slideInReverse;
+}
+
+@keyframes slideInReverse {
+  0% {
+    bottom: -30px;
+    /* Initial position for 'W' */
+  }
+
+  100% {
+    bottom: 0;
+    /* Final position for 'W' */
+    color: #7abb01;
+  }
+}
+
+.me-auto-tags {
+  margin-right: 10vh;
+}
+
+.plots {
+  display: flex;
+  flex-direction: row;
+}
+
+.footer {
+  color: aliceblue;
+  padding: 20px;
+  background-color: #1e2024;
+  box-shadow: 0px -4px 20px #7abb01;
+  /* padding-bottom: 0px; */
+  background-image: url("../public/vw_logo.jpg");
+  background-position: 5rem;
+  background-repeat: no-repeat;
+  /* background-size: cover; */
+}
+
+.letter {
+  /* font-size: x-large; */
+  /* font-weight: bold; */
+  color: #7abb01;
+  animation: fadeIn 3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.letter:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.letter:nth-child(2) {
+  animation-delay: 1s;
+}
+
+.letter:nth-child(3) {
+  animation-delay: 2s;
+}
+
+
+
+.temp {
+  /* font-size: x-large; */
+  align-items: center;
+  padding: 5px;
+  font-weight: bold;
+  color: #7abb01;
+  position: relative;
+  animation-name: slideIn;
+  animation-duration: 2s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: backwards;
+}
+
+@keyframes slideIn {
+  0% {
+    left: -30px;
+    /* Initial position for 'V' */
+  }
+
+  100% {
+    left: 0;
+    /* Final position for 'V' */
+    color: #7abb01;
+  }
+}
+
+.temp-in {
+  animation-name: slideInReverse;
+}
+
+@keyframes slideInReverse {
+  0% {
+    right: -30px;
+    /* Initial position for 'W' */
+  }
+
+  100% {
+    right: 0;
+    /* Final position for 'W' */
+    color: #7abb01;
+  }
 }

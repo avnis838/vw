@@ -23,7 +23,40 @@ const workercode = () => {
         });
         break;
       case "blobber":
-        const blob = new Blob([arg], { type: "text/csv;charset=utf-8;" });
+        //
+        const data1 = {
+          column1: arg["column1"], // Array for column 1
+          column2: arg["column2"], // Array for column 2
+          column3: arg["column3"], // Array for column 3
+        };
+
+        console.log(data1);
+        // Get the keys (column names) from the data object
+        const columns = Object.keys(data1);
+
+        // Create an array of arrays where each inner array represents a column
+        // const columnsData = columns.map((column) => data[`${column}`]);
+
+        // Create the CSV content
+        const csvContent = columns
+          .map((column) => {
+            console.log(data1[column]);
+
+            const columnsData = Array.isArray(data1[column])
+              ? data1[column].join(",")
+              : "";
+            console.log(columnsData);
+            return `"${column}","\n",${data1[column]}`;
+          })
+          .join("\n");
+
+        // Create the Blob
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+
+        //
+
         // console.log(blob);
         postMessage({
           type: type,

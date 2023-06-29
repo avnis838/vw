@@ -95,7 +95,7 @@ const DatavsData = () => {
   var itemMessagex = "",
     itemMessagey = "";
   useEffect(() => {
-    const client = mqtt.connect("mqtt://192.168.1.25:9001", options);
+    const client = mqtt.connect("mqtt://192.168.1.19:9001", options);
     client.on("connect", () => {
       console.log("connected");
       topiclink.forEach((x, i) => {

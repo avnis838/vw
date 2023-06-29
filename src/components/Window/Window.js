@@ -12,7 +12,7 @@ var options = {
 };
 
 var start_time = Date();
-var client = mqtt.connect("mqtt://192.168.1.25:9001", options);
+var client = mqtt.connect("mqtt://192.168.1.19:9001", options);
 
 client.subscribe("esp32/temperature");
 console.log(client);

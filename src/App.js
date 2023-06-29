@@ -14,9 +14,7 @@ import Footer from "./components/Navbar/Footer";
 }
 // import "semantic-ui-css/semantic.min.css";
 
-const refresh = () => {
-  window.location.reload();
-};
+//base file
 
 function App() {
   return (

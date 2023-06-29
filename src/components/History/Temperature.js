@@ -18,7 +18,7 @@ var start_time = Date();
 var count = 50;
 var countd = 50;
 var ymax = 50;
-var allEntries = [,];
+var allEntriest = [];
 
 var startingNumbers = Array(count)
   .fill(1)
@@ -27,11 +27,11 @@ var startingNumbers = Array(count)
 var startingNumbersy = Array(ymax)
   .fill(1)
   .map((_, i) => i);
+const myWorker = new Worker(worker_script, { type: "module" });
 const Temperature = () => {
   const [stop, setStop] = useState(true);
   const [save, setSave] = useState(false);
   const [note, setNote] = useState("#");
-  const myWorker = new Worker(worker_script, { type: "module" });
 
   const [dataGraph, setDataGraph] = useState({
     x: startingNumbers,
@@ -105,14 +105,6 @@ const Temperature = () => {
       console.error("An Invalid type has been passed in");
     }
   };
-  const saveHandler = () => {
-    setSave(!save);
-    if (save) {
-      var data = sessionStorage.getItem("allEntries");
-      nonBlockingExport(data);
-      sessionStorage.clear();
-    }
-  };
 
   useEffect(() => {
     const client = mqtt.connect("mqtt://192.168.1.19:9001", options);
@@ -126,78 +118,100 @@ const Temperature = () => {
       // note = message.toString();
       const itemMessage = message.toString();
       // console.log(itemMessage + "*" + Date.now());
-      setData((prev) => {
+      setDataGraph((prev) => {
+        countd++;
         return {
-          x: stop ? [...prev.x, countd++] : [...prev.x],
-          y: stop ? [...prev.y, itemMessage] : [...prev.y],
-          // mode: "lines+markers",
+          x: stop ? [...prev.x.slice(1), countd] : [...prev.x],
+          y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
+          mode: "lines+markers",
         };
       });
 
-      allEntries.push(itemMessage + "\n");
-      sessionStorage.setItem("allEntries", allEntries);
-
-      if (stop) setCurrent_time(Date());
+      if (stop) {
+        setNote(itemMessage);
+        allEntriest.push(itemMessage, "\n");
+        sessionStorage.setItem("allEntriest", allEntriest);
+      } else {
+        allEntriest.push("-" + "\n");
+      }
     });
 
     return () => {
       client.end();
     };
-  }, []);
+  }, [stop]);
 
-  useEffect(() => {
-    // if (data) {
+  // useEffect(() => {
+  //   // if (data) {
 
-    const interval = setInterval(() => {
-      console.log(data.x.length);
+  //   const interval = setInterval(() => {
+  //     // console.log(data.x.length + "ewe" + new Date().getTime());
 
-      setDataGraph((prev) => {
-        return {
-          x: stop ? [...prev.x.slice(1), ++count] : [...prev.x],
-          y: stop ? [...prev.y.slice(1), data.y[count]] : [...prev.y],
-          mode: "lines+markers",
-        };
-      });
-      // if (save) webworker.postMessage(data.y[count]);
-      setNote(data.y[count]);
-      // webworker.terminate();
-    }, 50);
+  //     setDataGraph((prev) => {
+  //       return {
+  //         x: stop ? [...prev.x.slice(1), ++count] : [...prev.x],
+  //         y: stop ? [...prev.y.slice(1), data.y[count]] : [...prev.y],
+  //         mode: "lines+markers",
+  //       };
+  //     });
 
-    // console.log("ererter");
-    return () => {
-      clearInterval(interval);
-    };
-    // }
-  }, [data]);
+  //     setData((prev) => {
+  //       return {
+  //         x: [...prev.x.slice(1)],
+  //         y: [...prev.y.slice(1)],
+  //         // mode: "lines+markers",
+  //       };
+  //     });
+  //     setNote(data.y[count]);
+  //     // if (save) webworker.postMessage(data.y[count]);
+  //     // webworker.terminate();
+  //   }, 50);
+
+  //   // console.log("ererter");
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  //   // }
+  // }, [data]);
 
   return (
     <div className="temp">
-      <h1 className="title_head">Perfomance Temeperature2 Dashboard</h1>
+      <div className="letter">
+        <h1 className="title_head letter">Perfomance Temeperature Dashboard</h1>
 
-      <button className="button button-33" onClick={stopHandler}>
-        {stop ? "Stop" : "Run"}
-      </button>
-      <button class="button button-33" onClick={saveHandler}>
-        {save ? "Saving..." : "Save"}
-      </button>
-      <p>Temperature is: {note}degree C</p>
-      <div className="time_heading">
-        <h4>Start Time : {start_time}</h4>
-        <h4>Current Time : {current_time}</h4>
-      </div>
-      <div className="plot">
-        <Plot
-          data={[dataGraph]}
-          layout={{
-            height: "20vh",
-            width: "40vh",
-            title: "Temperature2 Growth",
+        <button className="button button-33" onClick={stopHandler}>
+          {stop ? "Stop" : "Run"}
+        </button>
 
-            yaxis: { title: "Temperature2 (&deg;C)" },
-          }}
-        />
+        <p>Temperature is: {note}&deg;C</p>
+
+        <div className="plot">
+          <Plot
+            data={[dataGraph]}
+            layout={{
+              mode: "lines+markers",
+              autosize: false,
+              width: 600,
+              height: 400,
+
+              margin: {
+                l: 50,
+                r: 50,
+                b: 50,
+                t: 50,
+                pad: 4,
+              },
+              // font: "#ffffff",
+              paper_bgcolor: "#1e2024",
+              plot_bgcolor: "#1e2024",
+              title: "Temperature Growth",
+
+              yaxis: { title: "Temperature2 (&deg;C)" },
+            }}
+          />
+        </div>
+        <br />
       </div>
-      <br />
     </div>
   );
 };

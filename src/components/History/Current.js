@@ -20,7 +20,7 @@ var start_time = Date();
 
 var count = 50;
 var countd = 50;
-var allEntries = [,];
+var allEntriesc = [];
 var ymax = 50;
 
 var startingNumbers = Array(count)
@@ -30,11 +30,11 @@ var startingNumbers = Array(count)
 var startingNumbersy = Array(ymax)
   .fill(1)
   .map((_, i) => i);
+const myWorker = new Worker(worker_script, { type: "module" });
 const Current = () => {
   const [stop, setStop] = useState(true);
   const [save, setSave] = useState(false);
   const [note, setNote] = useState("#");
-  const myWorker = new Worker(worker_script, { type: "module" });
 
   const [dataGraph, setDataGraph] = useState({
     x: startingNumbers,
@@ -112,7 +112,7 @@ const Current = () => {
   const saveHandler = () => {
     setSave(!save);
     if (save) {
-      var data = sessionStorage.getItem("allEntries");
+      var data = sessionStorage.getItem("allEntriesc");
       nonBlockingExport(data);
       sessionStorage.clear();
     }
@@ -126,66 +126,88 @@ const Current = () => {
     });
     client.on("message", function (topic, message) {
       // note = message.toString();
-      const itemMessage = message.toString();
+      const itemMessage = message.toString().substring(0, 4);
 
-      setData((prev) => {
+      setDataGraph((prev) => {
+        countd++;
         return {
-          x: stop ? [...prev.x, countd++] : [...prev.x],
-          y: stop ? [...prev.y, itemMessage] : [...prev.y],
-          // mode: "lines+markers",
+          x: stop ? [...prev.x.slice(1), countd] : [...prev.x],
+          y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
+          mode: "lines+markers",
         };
       });
 
-      allEntries.push(itemMessage + "\n");
-      sessionStorage.setItem("allEntries", allEntries);
+      // console.log(dataGraph.x.length);
+      if (stop) {
+        setNote(itemMessage);
+        allEntriesc.push(itemMessage + "\n");
+        sessionStorage.setItem("allEntriesc", allEntriesc);
+      } else {
+        allEntriesc.push("-" + "\n");
+      }
 
       if (stop) setCurrent_time(Date());
     });
     return () => {
       client.end();
     };
-  }, []);
+  }, [stop]);
 
-  useEffect(() => {
-    // if (data) {
-    const interval = setInterval(() => {
-      // console.log(data.x.length);
-      setDataGraph((prev) => {
-        return {
-          x: stop ? [...prev.x.slice(1), ++count] : [...prev.x],
-          y: stop ? [...prev.y.slice(1), data.y[count]] : [...prev.y],
-          mode: "lines+markers",
-        };
-      });
-      setNote(data.y[count]);
-    }, 50);
+  // useEffect(() => {
+  //   // if (data) {
+  //   const interval = setInterval(() => {
+  //     // console.log(data.x.length);
+  //     setDataGraph((prev) => {
+  //       return {
+  //         x: stop ? [...prev.x.slice(1), ++count] : [...prev.x],
+  //         y: stop ? [...prev.y.slice(1), data.y[count]] : [...prev.y],
+  //         mode: "lines+markers",
+  //       };
+  //     });
 
-    // console.log("ererter");
-    return () => clearInterval(interval);
-    // }
-  }, [data]);
+  //     setData((prev) => {
+  //       return {
+  //         x: [...prev.x.slice(1)],
+  //         y: [...prev.y.slice(1)],
+  //         // mode: "lines+markers",
+  //       };
+  //     });
+  //     setNote(data.y[count]);
+  //   }, 50);
+
+  //   // console.log("ererter");
+  //   return () => clearInterval(interval);
+  //   // }
+  // }, [data]);
 
   return (
     <div className="temp">
-      <h1 className="title_head">Perfomance Current Dashboard</h1>
+      <h1 className="title_head letter">Perfomance Current Dashboard</h1>
 
       <button className="button button-33" onClick={stopHandler}>
         {stop ? "Stop" : "Run"}
       </button>
-      <button class="button button-33" onClick={saveHandler}>
-        {save ? "Saving..." : "Save"}
-      </button>
+
       <p>Current is: {note}mA</p>
-      <div className="time_heading">
-        <h4>Start Time : {start_time}</h4>
-        <h4>Current Time : {current_time}</h4>
-      </div>
+
       <div className="plot">
         <Plot
-          data={[dataGraph]}
+          data={([dataGraph], [dataGraph])}
           layout={{
-            height: "20vh",
-            width: "40vh",
+            mode: "lines+markers",
+            autosize: false,
+            width: 600,
+            height: 400,
+
+            margin: {
+              l: 50,
+              r: 50,
+              b: 50,
+              t: 50,
+              pad: 4,
+            },
+            paper_bgcolor: "#1e2024",
+            plot_bgcolor: "#1e2024",
             title: "Current Growth",
 
             yaxis: { title: "Current (mA)" },

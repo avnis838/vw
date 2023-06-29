@@ -3,20 +3,121 @@ import "../../App.css";
 import Current from "./Current.js";
 import Temperature2 from "./Temperature.js";
 import Voltage from "./Voltage.js";
-import DatavsData from "./DatavsData.js";
+import worker_script from "./worker.js";
+
+import { useState } from "react";
+import { useEffect } from "react";
+// import DatavsData from "./DatavsData.js";
 
 // import { Button } from "semantic-ui-react";
-
+var start_time = Date();
+const myWorker = new Worker(worker_script, { type: "module" });
 export default function History() {
+  const [current_time, setCurrent_time] = useState(start_time);
+  const [save, setSave] = useState(false);
+  const saveHandler = () => {
+    setSave(!save);
+    if (save) {
+      var value1 = sessionStorage.getItem("allEntriest");
+      var value2 = sessionStorage.getItem("allEntriesc");
+      var value3 = sessionStorage.getItem("allEntriesv");
+      const data = {
+        column1: value1,
+        column2: value2,
+        column3: value3,
+      };
+      // console.log(data);
+      nonBlockingExport(data);
+      sessionStorage.clear();
+    }
+  };
+
+  const nonBlockingExport = (data) => {
+    // clickStart = new Date().getTime();
+    getCSV(data);
+  };
+
+  const getCSV = (data) => {
+    console.log("Formatting csv...");
+    workerMaker("csvFormat", data);
+  };
+
+  const getBlob = (csvFile) => {
+    console.log("creating blob...");
+    workerMaker("blobber", csvFile);
+  };
+
+  const workerMaker = (type, arg) => {
+    // check if a Worker has been defined before calling postMessage with specified arguments
+    if (window.Worker) {
+      myWorker.postMessage({ type, arg });
+    }
+  };
+
+  const saveFile = (blob) => {
+    const uniqTime = new Date().getTime();
+    const filename = `my_file_${uniqTime}`;
+    if (navigator.msSaveBlob) {
+      // IE 10+
+      console.info("Starting call for " + "ie download");
+      const ieFilename = `${filename}.csv`;
+      navigator.msSaveBlob(blob, ieFilename);
+    } else {
+      console.info(`Starting call for html5 download`);
+      const link = document.createElement("a");
+      if (link.download !== undefined) {
+        // feature detection
+        // Browsers that support HTML5 download attribute
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  };
+
+  myWorker.onmessage = function (e) {
+    console.log("Message received from worker");
+    const response = e.data;
+    const data = response.data;
+    const type = response.type;
+    if (type === "csvFormat") {
+      getBlob(data);
+    } else if (type === "blobber") {
+      saveFile(data);
+    } else {
+      console.error("An Invalid type has been passed in");
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent_time(Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
   return (
-    <div className="temp">
-      <div className="plot">
+    <div className="">
+      <div className="time_heading letter">
+        <h5>Start Time : {start_time}</h5>
+        <h5>Current Time : {current_time}</h5>
+      </div>
+      <button class="button button-33" onClick={saveHandler}>
+        {save ? "Saving..." : "Save"}
+      </button>
+      <div className="plots">
         <Current />
         <Voltage />
       </div>
-      <div className="plot">
+      <div className="plots">
         <Temperature2 />
-        <DatavsData />
+        {/* <DatavsData /> */}
       </div>
 
       <br />
