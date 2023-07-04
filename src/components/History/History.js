@@ -1,20 +1,128 @@
 import React from "react";
+import Tooltip from "@atlaskit/tooltip";
 import "../../App.css";
 import Current from "./Current.js";
-import Temperature2 from "./Temperature.js";
+import Temperature from "./Temperature.js";
 import Voltage from "./Voltage.js";
 import worker_script from "./worker.js";
+import { Multiselect } from "multiselect-react-dropdown";
+import { FaPlus, FaMinus } from "react-icons/fa";
 
+// import { Link } from "react-router-dom/cjs/react-router-dom.min";
 import { useState } from "react";
 import { useEffect } from "react";
-// import DatavsData from "./DatavsData.js";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Select, { components, SingleValueProps } from "react-select";
+// import Button from "@mui/material/Button";
 
-// import { Button } from "semantic-ui-react";
+import { Button, Icon } from "semantic-ui-react";
+
 var start_time = Date();
+
+var plotList = [
+  { value: "1", label: 1 },
+  { value: "2", label: 2 },
+  { value: "3", label: 3 },
+  { value: "4", label: 4 },
+];
+var topicList = [{ value: "", label: "" }];
+
+var showAddButton = false;
+
+var addoption = "";
+
 const myWorker = new Worker(worker_script, { type: "module" });
+
+// const Input = ({ children, ...props }: SingleValueProps<>) => {
+//   const [tooltipContent, setTooltipContent] = useState("");
+
+//   const handleInputChange = (event) => {
+//     const inputValue = event.target.value;
+//     console.log(inputValue);
+//     setTooltipContent(tooltipContent + inputValue);
+//   };
+//   const updatetopicList = () => {
+//     topicList.push({ value: `${tooltipContent}`, label: `${tooltipContent}` });
+//   };
+//   if (props.isHidden) {
+//     return <components.Input {...props} />;
+//   }
+//   return (
+//     <div className="inputtopic">
+//       <Tooltip content={"Custom Input"}>
+//         {/* {tooltipContent} */}
+//         <components.Input {...props} onChange={handleInputChange} />
+//       </Tooltip>
+//       <button onClick={updatetopicList} className="addtopic">
+//         <FaPlus />
+//       </button>
+//     </div>
+//   );
+// };
+
+// var plot1topic = "default";
+// var plot2topic = "default";
+const AddNewOption = (props) => {
+  const { children, ...rest } = props;
+
+  const handleClick = (data) => {
+    if (data) {
+      const inputValue = data;
+      const newValue = { value: inputValue, label: inputValue };
+      topicList.rem(newValue);
+    }
+  };
+
+  return (
+    <components.Option {...rest}>
+      {children}
+      <span
+        style={{
+          marginLeft: "auto",
+          marginRight: "10px",
+          cursor: "pointer",
+          position: "Right",
+        }}
+        onClick={handleClick}
+      >
+        <FaMinus />
+      </span>
+    </components.Option>
+  );
+};
+// var plot3topic = "default";
+
 export default function History() {
   const [current_time, setCurrent_time] = useState(start_time);
   const [save, setSave] = useState(false);
+  const [plot1topic, setplot1topic] = useState("default");
+  const [plot2topic, setplot2topic] = useState("default");
+  const [plot3topic, setplot3topic] = useState("default");
+  const [plot4topic, setplot4topic] = useState("default");
+  const [selectedplot, setSelectedplot] = useState();
+  const [selectedtopic, setSelectedtopic] = useState();
+
+  const customStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? "#E2E8F0" : "#EDF2F7",
+      borderColor: state.isFocused ? "#63B3ED" : "#CBD5E0",
+      boxShadow: state.isFocused ? "0 0 0 2px #A3BFFA" : "none",
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? "#4299E1"
+        : state.isFocused
+        ? "#A3BFFA"
+        : "#FFFFFF",
+      color: state.isSelected ? "#FFFFFF" : "#718096",
+    }),
+  };
+
+  // Array of all options
+
   const saveHandler = () => {
     setSave(!save);
     if (save) {
@@ -93,6 +201,70 @@ export default function History() {
     }
   };
 
+  const showToastMessage = () => {
+    if (selectedplot == null || selectedtopic == null) {
+      toast.error(`Both Plot and topic should be selected`, {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
+    } else {
+      if (selectedplot.value == "1") setplot1topic(selectedtopic.value);
+      else if (selectedplot.value == "2") setplot2topic(selectedtopic.value);
+      else if (selectedplot.value == "3") {
+        setplot3topic(selectedtopic.value);
+        console.log(plot3topic + "*");
+      }
+      console.log(plot3topic + " " + selectedtopic.value);
+      toast.success(
+        `Plot ${selectedplot.value} added with ${selectedtopic.value}`,
+        {
+          position: toast.POSITION.BOTTOM_CENTER,
+        }
+      );
+    }
+  };
+
+  // useEffect(() => {}, [plot1topic, plot2topic, plot3topic]);
+
+  function handleSelectplot(data) {
+    // console.log(data.value);
+    if (data.value) setSelectedplot(data);
+    else {
+      toast.error(`- means novalue,first add option to select `, {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
+    }
+  }
+
+  function handleSelecttopic(data) {
+    console.log(data.value);
+    if (data.value) setSelectedtopic(data);
+  }
+
+  const handleAddButtonClick = () => {
+    topicList.push(addoption);
+    showAddButton = false;
+    addoption = "";
+  };
+
+  const handleInputChange = (inputValue) => {
+    if (!inputValue) {
+      showAddButton = false;
+    }
+    if (!topicList.find((option) => option.value.includes(inputValue))) {
+      addoption = { value: inputValue, label: inputValue };
+      showAddButton = true;
+    }
+  };
+
+  // const handleMenuClose = () => {
+  //   if (
+  //     selectedtopic &&
+  //     !topicList.find((option) => option.value === selectedtopic.value)
+  //   ) {
+  //     topicList.push(selectedtopic);
+  //   }
+  // };
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent_time(Date());
@@ -102,8 +274,98 @@ export default function History() {
       clearInterval(interval);
     };
   }, []);
+
+  // console.log(compnentmap.get("3"));
+
   return (
     <div className="">
+      <div className="subscribe">
+        <div className="subscribeparts">
+          <h6>Plot no</h6>
+          <div className="dropdown-container">
+            <Select
+              options={plotList}
+              placeholder="ex - 1"
+              value={selectedplot}
+              onChange={handleSelectplot}
+              styles={customStyles}
+
+              // isSearchable={true}
+              // isMulti
+            />
+          </div>
+        </div>
+        <div className="subscribeparts">
+          <h6>Add/Subscribe topic</h6>
+          <div className="dropdown-container">
+            <div>
+              {showAddButton && (
+                <button className="addtopic add" onClick={handleAddButtonClick}>
+                  <FaPlus />
+                </button>
+              )}
+            </div>
+            <Select
+              className="search"
+              options={topicList}
+              value={selectedtopic}
+              onChange={handleSelecttopic}
+              onInputChange={handleInputChange}
+              // onMenuClose={handleMenuClose}
+              styles={customStyles}
+              // isClearable
+
+              isSearchable
+              components={{ Option: AddNewOption }}
+              placeholder="ex - esp32/temperature"
+              // closeMenuOnSelect={false}
+              // onCreateOption={handleCreateOption}
+            />
+          </div>
+        </div>
+        <div className="subscribeparts">
+          <Button
+            // class="button"
+            className="subbtn button-33 "
+            // variant="contained"
+            // color="success"
+            onClick={showToastMessage}
+          >
+            Subscribe
+          </Button>
+          <ToastContainer />
+        </div>
+      </div>
+      <div className="multiselect">
+        {/* <Multiselect
+          isObject={false}
+          onRemove={(event) => {
+            // console.log(event);
+
+            map1.forEach((value, key) => {
+              // console.log(value);
+              // console.log(key);
+              var flag = false;
+              event.map((component, index) => {
+                if (key == event[index]) {
+                  flag = true;
+                  // console.log(event[index]);
+                }
+              });
+
+              map1.set(key, flag);
+            });
+          }}
+          onSelect={(event) => {
+            // console.log(event);
+            event.map((component, index) => {
+              map1.set(event[index], true);
+            });
+          }}
+          options={options}
+        /> */}
+      </div>
+
       <div className="time_heading letter">
         <h5>Start Time : {start_time}</h5>
         <h5>Current Time : {current_time}</h5>
@@ -111,15 +373,25 @@ export default function History() {
       <button class="button button-33" onClick={saveHandler}>
         {save ? "Saving..." : "Save"}
       </button>
+
       <div className="plots">
-        <Current />
-        <Voltage />
-      </div>
-      <div className="plots">
-        <Temperature2 />
-        {/* <DatavsData /> */}
+        {true ? (
+          <Current message={plot1topic} />
+        ) : (
+          <div className="fokat"></div>
+        )}
+        {true ? (
+          <Voltage message={plot2topic} />
+        ) : (
+          <div className="fokat"></div>
+        )}
       </div>
 
+      <div className="plots">
+        {true ? <Temperature message={plot3topic} /> : ""}
+        {/* <Temperature2 /> */}
+        {/* <DatavsData /> */}
+      </div>
       <br />
     </div>
   );

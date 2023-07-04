@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../App.css";
 import Plot from "react-plotly.js";
 import worker_script from "./worker.js";
+import { toast } from "react-toastify";
 // import { type } from "@testing-library/user-event/dist/type";
 var mqtt = require("mqtt");
 var options = {
@@ -28,7 +29,7 @@ var startingNumbersy = Array(ymax)
   .fill(1)
   .map((_, i) => i);
 const myWorker = new Worker(worker_script, { type: "module" });
-const Temperature = () => {
+const Temperature = (props) => {
   const [stop, setStop] = useState(true);
   const [save, setSave] = useState(false);
   const [note, setNote] = useState("#");
@@ -36,6 +37,7 @@ const Temperature = () => {
   const [dataGraph, setDataGraph] = useState({
     x: startingNumbers,
     y: startingNumbersy,
+    line: { color: "#ff8c00" },
   });
   const [data, setData] = useState({
     x: startingNumbers,
@@ -102,16 +104,20 @@ const Temperature = () => {
     } else if (type === "blobber") {
       saveFile(data);
     } else {
-      console.error("An Invalid type has been passed in");
+      toast.error(`An Invalid type has been passed in`, {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
     }
   };
 
   useEffect(() => {
-    const client = mqtt.connect("mqtt://192.168.1.19:9001", options);
+    const client = mqtt.connect("mqtt://192.168.1.18:9001", options);
     // console.log(client.connected);
     client.on("connect", () => {
       console.log("connected");
-      client.subscribe("esp32/temperature2");
+      // console.log(`${props.message}`);
+      client.subscribe(`${props.message}`);
+      // client.subscribe("esp32/temperature");
     });
 
     client.on("message", function (topic, message) {
@@ -124,22 +130,24 @@ const Temperature = () => {
           x: stop ? [...prev.x.slice(1), countd] : [...prev.x],
           y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
           mode: "lines+markers",
+          line: { color: "#ff8c00" },
         };
       });
 
       if (stop) {
         setNote(itemMessage);
-        allEntriest.push(itemMessage, "\n");
+        allEntriest.push(itemMessage);
+        // allEntriest.push(Date.now());
         sessionStorage.setItem("allEntriest", allEntriest);
       } else {
-        allEntriest.push("-" + "\n");
+        allEntriest.push("-");
       }
     });
 
     return () => {
       client.end();
     };
-  }, [stop]);
+  }, [stop, props]);
 
   // useEffect(() => {
   //   // if (data) {
@@ -177,13 +185,17 @@ const Temperature = () => {
   return (
     <div className="temp">
       <div className="letter">
-        <h1 className="title_head letter">Perfomance Temeperature Dashboard</h1>
+        <h1 className="title_head letter">
+          Perfomance {props.message} Dashboard
+        </h1>
 
         <button className="button button-33" onClick={stopHandler}>
           {stop ? "Stop" : "Run"}
         </button>
 
-        <p>Temperature is: {note}&deg;C</p>
+        <p>
+          {props.message} is: {note}&deg;C
+        </p>
 
         <div className="plot">
           <Plot
@@ -191,7 +203,7 @@ const Temperature = () => {
             layout={{
               mode: "lines+markers",
               autosize: false,
-              width: 600,
+              width: 500,
               height: 400,
 
               margin: {
@@ -204,9 +216,9 @@ const Temperature = () => {
               // font: "#ffffff",
               paper_bgcolor: "#1e2024",
               plot_bgcolor: "#1e2024",
-              title: "Temperature Growth",
+              title: `${props.message} Growth`,
 
-              yaxis: { title: "Temperature2 (&deg;C)" },
+              yaxis: { title: `${props.message} (&deg;C)` },
             }}
           />
         </div>

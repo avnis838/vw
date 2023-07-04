@@ -25,9 +25,9 @@ const workercode = () => {
       case "blobber":
         //
         const data1 = {
-          column1: arg["column1"], // Array for column 1
-          column2: arg["column2"], // Array for column 2
-          column3: arg["column3"], // Array for column 3
+          Temperature: arg["column1"], // Array for column 1
+          Current: arg["column2"], // Array for column 2
+          Voltage: arg["column3"], // Array for column 3
         };
 
         console.log(data1);
@@ -46,7 +46,7 @@ const workercode = () => {
               ? data1[column].join(",")
               : "";
             console.log(columnsData);
-            return `"${column}","\n",${data1[column]}`;
+            return `"${column}",${data1[column]}`;
           })
           .join("\n");
 

@@ -9,6 +9,7 @@ import Window from "../Window/Window.js";
 import { Home } from "../../Home";
 import "../../App.css";
 import logo from "../../utils/vw_logo.png";
+import Select_topicState from "../../context/Select_topic/Select_topicState.js";
 
 // this method is for navbar and rndered on all pages
 export default class NavBar extends Component {
@@ -16,10 +17,10 @@ export default class NavBar extends Component {
     super(props);
     this.state = {
       objectArray: [
-        { key: "Option 1", cat: "Group 1" },
-        { key: "Option 2", cat: "Group 1" },
-        { key: "Option 3", cat: "Group 1" },
-        { key: "Option 4", cat: "Group 2" },
+        { key: "Temperature", cat: "Group 1" },
+        { key: "Voltage", cat: "Group 1" },
+        { key: "Current", cat: "Group 1" },
+        { key: "Speed", cat: "Group 2" },
         { key: "Option 5", cat: "Group 2" },
         { key: "Option 6", cat: "Group 2" },
         { key: "Option 7", cat: "Group 2" },
@@ -31,6 +32,7 @@ export default class NavBar extends Component {
         { key: "Option 13", cat: "Group 2" },
         { key: "Option 14", cat: "Group 2" },
       ],
+      selectedValues: [],
     };
     this.style = {
       searchBox: {
@@ -40,9 +42,15 @@ export default class NavBar extends Component {
       },
     };
   }
+
+  handleSelect = (selectedList, selectedItem) => {
+    this.setState({ selectedValues: selectedList });
+  };
+
   render() {
     // const [field, setField] = useState([]);
-    const { objectArray } = this.state;
+    const { objectArray } = this.state.objectArray;
+    const { selectedValues } = this.state.selectedValues;
     return (
       <Router>
         <div>
@@ -55,18 +63,21 @@ export default class NavBar extends Component {
               </Navbar.Brand>
               <div className="me-auto-tags">
                 <Nav className="me-auto ">
-                  <Multiselect
+                  <span className="red-letter">Noida,UP</span>
+                  {/* <Multiselect
                     options={objectArray}
                     displayValue="key"
                     showCheckbox={true}
+                    onSelect={this.handleSelect}
+                    onRemove={this.handleSelect}
                   />
+                  <Select_topicState selectedValues={selectedValues} /> */}
                   {/* <Nav.Link as={Link} to="/home">
                     Home
                   </Nav.Link> */}
                   {/* <Nav.Link as={Link} to="/history">
                     History
                   </Nav.Link> */}
-
                   {/* <Nav.Link as={Link} to="/window">
                     Pricing
                   </Nav.Link> */}

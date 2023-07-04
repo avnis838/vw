@@ -31,7 +31,7 @@ var startingNumbersy = Array(ymax)
   .fill(1)
   .map((_, i) => i);
 const myWorker = new Worker(worker_script, { type: "module" });
-const Current = () => {
+const Current = (props) => {
   const [stop, setStop] = useState(true);
   const [save, setSave] = useState(false);
   const [note, setNote] = useState("#");
@@ -39,6 +39,7 @@ const Current = () => {
   const [dataGraph, setDataGraph] = useState({
     x: startingNumbers,
     y: startingNumbersy,
+    line: { color: "#17BECF" },
   });
 
   const [data, setData] = useState({
@@ -119,31 +120,36 @@ const Current = () => {
   };
 
   useEffect(() => {
-    const client = mqtt.connect("mqtt://192.168.1.19:9001", options);
+    const client = mqtt.connect("mqtt://192.168.1.18:9001", options);
     client.on("connect", () => {
       console.log("connected");
-      client.subscribe("esp32/current");
+      console.log(`${props.message}`);
+      client.subscribe(`${props.message}`);
+      // client.subscribe("mqtt/topic1");
     });
     client.on("message", function (topic, message) {
       // note = message.toString();
-      const itemMessage = message.toString().substring(0, 4);
-
-      setDataGraph((prev) => {
-        countd++;
-        return {
-          x: stop ? [...prev.x.slice(1), countd] : [...prev.x],
-          y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
-          mode: "lines+markers",
-        };
-      });
+      const itemMessage = message.toString();
 
       // console.log(dataGraph.x.length);
       if (stop) {
+        setDataGraph((prev) => {
+          countd++;
+          // Specify the maximum range of values on the y-axis
+
+          return {
+            x: stop ? [...prev.x.slice(1), countd] : [...prev.x],
+            y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
+            mode: "lines+markers",
+            line: { color: "#17BECF" },
+          };
+        });
         setNote(itemMessage);
-        allEntriesc.push(itemMessage + "\n");
+        allEntriesc.push(itemMessage);
+        // allEntriesc.push(Date.now());
         sessionStorage.setItem("allEntriesc", allEntriesc);
       } else {
-        allEntriesc.push("-" + "\n");
+        allEntriesc.push("-");
       }
 
       if (stop) setCurrent_time(Date());
@@ -151,7 +157,7 @@ const Current = () => {
     return () => {
       client.end();
     };
-  }, [stop]);
+  }, [stop, props]);
 
   // useEffect(() => {
   //   // if (data) {
@@ -182,21 +188,25 @@ const Current = () => {
 
   return (
     <div className="temp">
-      <h1 className="title_head letter">Perfomance Current Dashboard</h1>
+      <h1 className="title_head letter">
+        Perfomance {props.message} Dashboard
+      </h1>
 
       <button className="button button-33" onClick={stopHandler}>
         {stop ? "Stop" : "Run"}
       </button>
 
-      <p>Current is: {note}mA</p>
+      <p>
+        {props.message} is: {note}mA
+      </p>
 
       <div className="plot">
         <Plot
-          data={([dataGraph], [dataGraph])}
+          data={[dataGraph]}
           layout={{
             mode: "lines+markers",
             autosize: false,
-            width: 600,
+            width: 500,
             height: 400,
 
             margin: {
@@ -208,9 +218,38 @@ const Current = () => {
             },
             paper_bgcolor: "#1e2024",
             plot_bgcolor: "#1e2024",
-            title: "Current Growth",
+            title: `${props.message} Growth`,
 
-            yaxis: { title: "Current (mA)" },
+            yaxis: {
+              title: `${props.message} (mA)`,
+
+              range: [-16000, 16000],
+              type: "linear",
+            },
+
+            // xaxis: {
+            //   autorange: true,
+            //   range: [countd - 50, countd],
+            //   rangeselector: {
+            //     buttons: [
+            //       {
+            //         count: 1,
+            //         label: "10",
+            //         step: 10,
+            //         stepmode: "backward",
+            //       },
+            //       {
+            //         count: 6,
+            //         label: "50",
+            //         step: 50,
+            //         stepmode: "backward",
+            //       },
+            //       { step: countd },
+            //     ],
+            //   },
+            //   rangeslider: { range: [0, countd] },
+            //   type: "linear",
+            // },
           }}
         />
       </div>

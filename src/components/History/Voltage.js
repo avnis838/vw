@@ -35,7 +35,7 @@ var startingNumbersy = Array(ymax)
 
 const myWorker = new Worker(worker_script, { type: "module" }); //thread creation for threading
 
-const Voltage = () => {
+const Voltage = (props) => {
   const [stop, setStop] = useState(true); // state to stop graph of voltage stop true means you can stop ie graph is running
   const [save, setSave] = useState(false); //state to save the datas in csv file and download it
   const [note, setNote] = useState("#"); // data indicator will container # till value is not comming
@@ -133,42 +133,45 @@ const Voltage = () => {
   };
 
   useEffect(() => {
-    const client = mqtt.connect("mqtt://192.168.1.19:9001", options); ////client specifications to connect to server
+    const client = mqtt.connect("mqtt://192.168.1.18:9001", options); ////client specifications to connect to server
     client.on("connect", () => {
       //connect done once when voltage compnent is refreshed
       console.log("connected");
-      client.subscribe("esp32/voltage"); // client will subscribe to the topic voltage
+      // client.subscribe("esp32/voltage"); // client will subscribe to the topic voltage
+      // client.subscribe("mqtt/topic2"); // client will subscribe to the topic voltage
+      // console.log(`${props.message}`);
+      client.subscribe(`${props.message}`);
     });
     client.on("message", function (topic, message) {
       //an event listener function to be called when data of particular topic is received
       // note = message.toString();
-      const itemMessage = message.toString().substring(0, 4);
-
-      setDataGraph((prev) => {
-        countd++;
-        //datagraph queue will be updated with one value and oldest will be deleted
-        return {
-          x: stop ? [...prev.x.slice(1), countd] : [...prev.x],
-          y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
-          mode: "lines+markers",
-          xaxis: { autorange: true },
-          yaxis: { autorange: false },
-        };
-      });
+      const itemMessage = message.toString();
 
       if (stop) {
+        setDataGraph((prev) => {
+          countd++;
+          //datagraph queue will be updated with one value and oldest will be deleted
+          return {
+            x: stop ? [...prev.x.slice(1), countd] : [...prev.x],
+            y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
+            mode: "lines+markers",
+          };
+        });
         setNote(itemMessage);
-        allEntriesv.push(itemMessage + "\n");
+        allEntriesv.push(itemMessage);
+        // allEntriesv.push(Date.now());
         sessionStorage.setItem("allEntriesv", allEntriesv);
       } else {
-        allEntriesv.push("-" + "\n");
+        allEntriesv.push("-");
       }
+
+      if (stop) setCurrent_time(Date());
     });
     return () => {
       //on evry session closure client will end
       client.end();
     };
-  }, [stop]);
+  }, [stop, props]);
 
   // useEffect(() => {
   //   // if (data) {
@@ -198,13 +201,17 @@ const Voltage = () => {
 
   return (
     <div className="temp">
-      <h1 className="title_head letter">Perfomance Voltage Dashboard</h1>
+      <h1 className="title_head letter">
+        Perfomance {props.message} Dashboard
+      </h1>
 
       <button className="button button-33" onClick={stopHandler}>
         {stop ? "Stop" : "Run"}
       </button>
 
-      <p>Voltage is: {note}mV</p>
+      <p>
+        {props.message} is: {note}mV
+      </p>
 
       <div className="plot">
         <Plot
@@ -212,10 +219,9 @@ const Voltage = () => {
           layout={{
             mode: "lines+markers",
             autosize: true,
-            width: 600,
+            width: 500,
             height: 400,
-            xaxis: { autorange: true },
-            yaxis: { autorange: false },
+
             margin: {
               l: 50,
               r: 50,
@@ -225,9 +231,13 @@ const Voltage = () => {
             },
             paper_bgcolor: "#1e2024",
             plot_bgcolor: "#1e2024",
-            title: "Voltage Growth",
+            title: `${props.message} Growth`,
 
-            yaxis: { title: "Voltage (mV)" },
+            yaxis: {
+              title: `${props.message} (mV)`,
+              range: [-16000, 16000],
+              type: "linear",
+            },
           }}
         />
       </div>
