@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/vw/static/css/main.0b6da49d.css",
+    "main.js": "/vw/static/js/main.56050594.js",
+    "static/js/787.59196f1a.chunk.js": "/vw/static/js/787.59196f1a.chunk.js",
+    "static/media/vw_logo.png": "/vw/static/media/vw_logo.e635a3e813570b3eba1d.png",
+    "index.html": "/vw/index.html",
+    "main.0b6da49d.css.map": "/vw/static/css/main.0b6da49d.css.map",
+    "main.56050594.js.map": "/vw/static/js/main.56050594.js.map",
+    "787.59196f1a.chunk.js.map": "/vw/static/js/787.59196f1a.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0b6da49d.css",
+    "static/js/main.56050594.js"
+  ]
+}
