@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useWorker, WORKER_STATUS } from "@koale/useworker";
+// import { useWorker, WORKER_STATUS } from "@koale/useworker";
 import "../../App.css";
 import Plot from "react-plotly.js";
 import worker_script from "./worker.js";

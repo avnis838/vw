@@ -1,15 +1,12 @@
 import React, { Component, Children, PropTypes } from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import { BrowserRouter as Router, Switch, Link, Route } from "react-router-dom";
-import { Multiselect } from "multiselect-react-dropdown";
-import { Button } from "semantic-ui-react";
+
 import History from "../History/History.js";
-import Window from "../Window/Window.js";
-// import Wifi_connect from "./components/Wifi_authentication/Wifi_connect.js";
-import { Home } from "../../Home";
+
 import "../../App.css";
 import logo from "../../utils/vw_logo.png";
-import Select_topicState from "../../context/Select_topic/Select_topicState.js";
+// import Select_topicState from "../../context/Select_topic/Select_topicState.js";
 
 // this method is for navbar and rndered on all pages
 export default class NavBar extends Component {
@@ -99,9 +96,7 @@ export default class NavBar extends Component {
           {/* <Route path="/connect">
             <Wifi_connect />
           </Route> */}
-          <Route path="/window">
-            <Window />
-          </Route>
+          <Route path="/window"></Route>
         </Switch>
       </Router>
     );
