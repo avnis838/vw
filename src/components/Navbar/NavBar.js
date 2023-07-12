@@ -30,6 +30,8 @@ export default class NavBar extends Component {
         { key: "Option 14", cat: "Group 2" },
       ],
       selectedValues: [],
+      location: null,
+      weather: null,
     };
     this.style = {
       searchBox: {
@@ -46,8 +48,39 @@ export default class NavBar extends Component {
 
   render() {
     // const [field, setField] = useState([]);
+    var location = this.state.location;
+    var weather = this.state.weather;
     const { objectArray } = this.state.objectArray;
     const { selectedValues } = this.state.selectedValues;
+    function handleLocationClick() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success, error);
+      } else {
+        console.log("Geolocation not supported");
+      }
+    }
+
+    function success(position) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      location = { latitude, longitude };
+      console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+
+      // Make API call to OpenWeatherMap
+      fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${"9946e55abecf363825843cff69fd8212"}&units=metric`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          weather = data;
+          console.log(data);
+        })
+        .catch((error) => console.log(error));
+    }
+
+    function error() {
+      console.log("Unable to retrieve your location");
+    }
     return (
       <Router>
         <div>
@@ -58,27 +91,18 @@ export default class NavBar extends Component {
                 <span className="red-letter">V</span>olt
                 <span className="red-letter w-letter">W</span>orks
               </Navbar.Brand>
-              <div className="me-auto-tags">
-                <Nav className="me-auto ">
-                  <span className="red-letter">Noida,UP</span>
-                  {/* <Multiselect
-                    options={objectArray}
-                    displayValue="key"
-                    showCheckbox={true}
-                    onSelect={this.handleSelect}
-                    onRemove={this.handleSelect}
-                  />
-                  <Select_topicState selectedValues={selectedValues} /> */}
-                  {/* <Nav.Link as={Link} to="/home">
-                    Home
-                  </Nav.Link> */}
-                  {/* <Nav.Link as={Link} to="/history">
-                    History
-                  </Nav.Link> */}
-                  {/* <Nav.Link as={Link} to="/window">
-                    Pricing
-                  </Nav.Link> */}
-                </Nav>
+              <div style={{ color: "white" }}>
+                {!location ? (
+                  <button onClick={handleLocationClick}>Get Location</button>
+                ) : null}
+                {location && !weather ? <p>Loading weather data...</p> : null}
+                {weather ? (
+                  <div>
+                    <p>Location: {weather.name}</p>
+                    <p>Temperature: {weather.main.temp} °C</p>
+                    <p>Weather: {weather.weather[0].description}</p>
+                  </div>
+                ) : null}
               </div>
             </div>
           </Navbar>

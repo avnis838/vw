@@ -515,3 +515,121 @@
   overflow: auto;
   border: 1px solid #ccc;
 }
+
+/* /////////////// */
+
+.splash-screen {
+  /* padding: 100px; */
+  width: 100%;
+  height: 100vh;
+  background-color: #1e2024;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.splash-screen .loading-dot {
+  font-size: 100px;
+  /* margin-top: -80px; */
+  position: relative;
+  animation: ease-in-out infinite alternate;
+  animation-name: run;
+  animation-duration: 1.2s;
+}
+
+/* //loadinglogo */
+
+.circle {
+  height: 40px;
+  width: 40px;
+  background-color: #7abb01;
+  border-radius: 50%;
+
+}
+
+.parallelogram4 {
+  width: 40px;
+  height: 60px;
+  transform: skew(-22deg);
+  background: #7abb01;
+}
+
+.parallelogram1 {
+  width: 40px;
+  height: 60px;
+  transform: skew(-22deg);
+  background: #555;
+}
+
+.parallelogram3 {
+  width: 4.75px;
+  height: 60px;
+  transform: skew(-22deg);
+  background: #1e2024;
+}
+
+.parallelogram2 {
+  width: 4.75px;
+  height: 60px;
+  transform: skew(-22deg);
+  background: #1e2024;
+}
+
+.parallelogram {
+  width: 50px;
+  height: 60px;
+  transform: skew(-22deg);
+  background: #555;
+}
+
+.upper,
+.lower {
+  display: flex;
+  display-direction: row;
+
+}
+
+.triangle-down {
+
+  margin-left: 33.5px;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 19.5px solid transparent;
+  border-top: 44px solid #7abb01
+}
+
+.triangle-down1 {
+
+  margin-left: 10px;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 19.5px solid transparent;
+  border-top: 44px solid #555;
+}
+
+@keyframes run {
+  0% {
+    padding-top: 20px;
+    left: -90px;
+    height: 10px;
+    /* background-color: #7abb01; */
+    color: #7cf669;
+  }
+
+  50% {
+    height: 10px;
+    /* background-color: #7abb01; */
+    color: #7cf669;
+  }
+
+  100% {
+    padding-top: 20px;
+    left: 90px;
+    height: 10px;
+    /* background-color: #7abb01; */
+    color: #7cf669;
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { BrowserRouter, Route, Switch, Link } from "react-router-dom";
+import withSplashScreen from "./components/withSplashScreen";
 import "./App.css";
 // import { Button } from "semantic-ui-react";
 // import History from "./components/History/History.js";
@@ -34,4 +35,4 @@ function App() {
   );
 }
 
-export default App;
+export default withSplashScreen(App);
