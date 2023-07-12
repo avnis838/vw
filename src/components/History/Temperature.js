@@ -3,6 +3,7 @@ import "../../App.css";
 import Plot from "react-plotly.js";
 import worker_script from "./worker.js";
 import { toast } from "react-toastify";
+import { FaStop, FaStopCircle } from "react-icons/fa";
 // import { type } from "@testing-library/user-event/dist/type";
 var mqtt = require("mqtt");
 var options = {
@@ -33,6 +34,8 @@ const Temperature = (props) => {
   const [stop, setStop] = useState(true);
   const [save, setSave] = useState(false);
   const [note, setNote] = useState("#");
+  const [ymax, setymax] = useState(50);
+  const [ymin, setymin] = useState(-50);
 
   const [dataGraph, setDataGraph] = useState({
     x: startingNumbers,
@@ -111,7 +114,7 @@ const Temperature = (props) => {
   };
 
   useEffect(() => {
-    const client = mqtt.connect("mqtt://192.168.1.18:9001", options);
+    const client = mqtt.connect("mqtt://192.168.1.2:9001", options);
     // console.log(client.connected);
     client.on("connect", () => {
       console.log("connected");
@@ -183,47 +186,105 @@ const Temperature = (props) => {
   // }, [data]);
 
   return (
-    <div className="temp">
-      <div className="letter">
-        <h1 className="title_head letter">
-          Perfomance {props.message} Dashboard
-        </h1>
-
-        <button className="button button-33" onClick={stopHandler}>
-          {stop ? "Stop" : "Run"}
-        </button>
-
-        <p>
-          {props.message} is: {note}&deg;C
-        </p>
-
-        <div className="plot">
-          <Plot
-            data={[dataGraph]}
-            layout={{
-              mode: "lines+markers",
-              autosize: false,
-              width: 500,
-              height: 400,
-
-              margin: {
-                l: 50,
-                r: 50,
-                b: 50,
-                t: 50,
-                pad: 4,
-              },
-              // font: "#ffffff",
-              paper_bgcolor: "#1e2024",
-              plot_bgcolor: "#1e2024",
-              title: `${props.message} Growth`,
-
-              yaxis: { title: `${props.message} (&deg;C)` },
+    <div className="letter">
+      <div className="inputtopic">
+        <p className="inputtopic">
+          <span style={{ marginRight: "10px" }}>
+            {stop ? (
+              <FaStop style={{ color: "red" }} onClick={stopHandler} />
+            ) : (
+              <FaStopCircle onClick={stopHandler} />
+            )}
+          </span>
+          {props.message} is:{" "}
+          <span
+            style={{
+              fontWeight: "bold",
+              color: "whitesmoke",
             }}
-          />
-        </div>
-        <br />
+          >
+            <div style={{ width: "100px" }}> {note}mA</div>
+          </span>{" "}
+          <div className="inputtopic" style={{ margin: "2px" }}>
+            <br />
+            <div className="inputtopic" style={{ margin: "2px" }}>
+              <label
+                className="form-label"
+                htmlFor="typeNumber2"
+                style={{ margin: "2px" }}
+              >
+                Y-Min
+              </label>
+              <div
+                className="form-outline"
+                style={{ width: "5rem", height: "1.5rem" }}
+              >
+                <input
+                  onChange={(event) => setymin(event.target.value)}
+                  step="0.01"
+                  defaultValue="-50"
+                  type="number"
+                  id="typeNumber2"
+                  className="form-control"
+                />
+              </div>
+            </div>
+            <div className="inputtopic" style={{ margin: "10px" }}>
+              <label
+                className="form-label"
+                htmlFor="typeNumber1"
+                style={{ margin: "2px" }}
+              >
+                Y-Max
+              </label>
+              <div
+                className="form-outline"
+                style={{ width: "5rem", height: "1.5rem" }}
+              >
+                <input
+                  onChange={(event) => setymax(event.target.value)}
+                  step="0.01"
+                  defaultValue="50"
+                  type="number"
+                  id="typeNumber1"
+                  className="form-control"
+                />
+              </div>
+            </div>
+          </div>
+        </p>
       </div>
+
+      <div className="plot">
+        <Plot
+          data={[dataGraph]}
+          layout={{
+            mode: "lines+markers",
+            autosize: false,
+            width: 500,
+            height: 400,
+
+            margin: {
+              l: 50,
+              r: 50,
+              b: 50,
+              t: 50,
+              pad: 4,
+            },
+            // font: "#ffffff",
+            paper_bgcolor: "#1e2024",
+            plot_bgcolor: "#1e2024",
+            title: `${props.message} Growth`,
+
+            yaxis: {
+              title: `${props.message} (&deg;C)`,
+              range: [ymin, ymax],
+              type: "linear",
+            },
+          }}
+        />
+      </div>
+      <br />
     </div>
   );
 };

@@ -23,7 +23,6 @@ var count = 50;
 var countd = 50;
 var allEntriesc = [];
 var ymax = 50;
-var width = 0.5;
 
 var startingNumbers = Array(count)
   .fill(1)
@@ -33,7 +32,7 @@ var startingNumbersy = Array(ymax)
   .fill(1)
   .map((_, i) => i);
 const myWorker = new Worker(worker_script, { type: "module" });
-const Current = (props) => {
+const Speed = (props) => {
   const [stop, setStop] = useState(true);
   const [save, setSave] = useState(false);
   const [note, setNote] = useState("#");
@@ -43,7 +42,7 @@ const Current = (props) => {
   const [dataGraph, setDataGraph] = useState({
     x: startingNumbers,
     y: startingNumbersy,
-    line: { color: "#17BECF" },
+    line: { color: "#ff66ff" },
   });
 
   const [data, setData] = useState({
@@ -123,11 +122,16 @@ const Current = (props) => {
     }
   };
 
+  function getChecked() {
+    const checkBox1 = document.getElementById("typeNumber1").value;
+    const checkBox2 = document.getElementById("typeNumber1").value;
+  }
+
   useEffect(() => {
     const client = mqtt.connect("mqtt://192.168.1.2:9001", options);
     client.on("connect", () => {
       console.log("connected");
-      // console.log(`${props.message}`);
+      console.log(`${props.message}`);
       client.subscribe(`${props.message}`);
       // client.subscribe("mqtt/topic1");
     });
@@ -135,27 +139,18 @@ const Current = (props) => {
       // note = message.toString();
       const itemMessage = message.toString();
 
-      for (var i = countd; i < 50 + countd; i++) {
-        var x = parseInt(dataGraph[i]);
-        x = x > 0 ? x : x * -1;
-        width = Math.max(x, width);
-
-        setymax(width);
-        // setymin(-1 * width);
-      }
-
       // console.log(dataGraph.x.length);
       if (stop) {
         setDataGraph((prev) => {
-          // Specify the maximum range of values on the y-axis
           countd++;
+          // Specify the maximum range of values on the y-axis
 
           return {
             x: stop ? [...prev.x.slice(1), countd] : [...prev.x],
             y: stop ? [...prev.y.slice(1), itemMessage] : [...prev.y],
             mode: "lines+markers",
-            type: "linear",
             line: { color: "#17BECF" },
+            area: { color: "#17BECF" },
           };
         });
         setNote(itemMessage);
@@ -235,7 +230,7 @@ const Current = (props) => {
                 style={{ width: "5rem", height: "1.5rem" }}
               >
                 <input
-                  // onChange={(event) => setymin(event.target.value)}
+                  onChange={(event) => setymin(event.target.value)}
                   step="0.01"
                   defaultValue="-50"
                   type="number"
@@ -257,7 +252,7 @@ const Current = (props) => {
                 style={{ width: "5rem", height: "1.5rem" }}
               >
                 <input
-                  // onChange={(event) => setymax(event.target.value)}
+                  onChange={(event) => setymax(event.target.value)}
                   step="0.01"
                   defaultValue="50"
                   type="number"
@@ -293,8 +288,8 @@ const Current = (props) => {
             yaxis: {
               title: `${props.message} (mA)`,
 
-              range: [-1 * ymax, ymax],
-              type: "linear",
+              range: [ymin, ymax],
+              type: "area",
             },
 
             // xaxis: {
@@ -328,4 +323,4 @@ const Current = (props) => {
   );
 };
 
-export default Current;
+export default Speed;

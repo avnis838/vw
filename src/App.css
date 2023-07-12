@@ -72,22 +72,57 @@
   background-color: #1e202477;
 
   display: flex;
+  flex-direction: row;
+  margin: 1rem;
+  padding: 1rem;
   margin-bottom: 20;
   align-items: center;
   justify-content: center;
-  flex-direction: row;
+  border: 2px solid white;
+  border-radius: 10px;
+
+
   /* border: 2px solid coral; */
   /* box-shadow: ; */
 }
 
-@media (max-width: 800px) {
+@media screen and (max-width: 800px) {
   .plots {
+    align-items: center;
     width: 50vh;
     display: flex;
-    margin-bottom: 20;
-    align-items: center;
-    /* flex-direction: row; */
     flex-direction: column;
+    margin-bottom: 20;
+    /* flex-direction: row; */
+  }
+}
+
+.plots-area {
+
+  /* margin-left: auto; */
+  /* background-color: #1e202477; */
+
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20;
+  align-items: center;
+  justify-content: center;
+  /* overflow-x: scroll; */
+  /* border: 2px solid coral; */
+  /* box-shadow: ; */
+}
+
+@media screen and (max-width: 800px) {
+  .plots-area {
+    width: 50vh;
+    align-items: center;
+    justify-content: center;
+    /* width: 50vh; */
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    /* overflow-x: scroll; */
+    /* flex-direction: row; */
   }
 }
 
@@ -407,6 +442,17 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+
+}
+
+@media screen and (max-width: 800px) {
+
+  .subscribe {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    /* The width is 100%, when the viewport is 800px or smaller */
+  }
 }
 
 .subscribeparts {
@@ -424,7 +470,20 @@
 .inputtopic {
   /* color: #7abb01; */
   display: flex;
-  flex-direction: row
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+@media screen and (max-width: 800px) {
+
+  .inputtopic {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* The width is 100%, when the viewport is 800px or smaller */
+  }
 }
 
 .addtopic {
@@ -447,4 +506,12 @@
 .add:hover {
   background-color: #7abb01;
   color: white;
+}
+
+#resizableDiv {
+  width: 200px;
+  height: 200px;
+  resize: both;
+  overflow: auto;
+  border: 1px solid #ccc;
 }

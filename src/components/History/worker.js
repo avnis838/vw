@@ -38,15 +38,18 @@ const workercode = () => {
         // const columnsData = columns.map((column) => data[`${column}`]);
 
         // Create the CSV content
+        // console.log(arg["column1"].length);
         const csvContent = columns
           .map((column) => {
-            console.log(data1[column]);
+            if (column == "Temperature") {
+              console.log(data1[column]);
 
-            const columnsData = Array.isArray(data1[column])
-              ? data1[column].join(",")
-              : "";
-            console.log(columnsData);
-            return `"${column}",${data1[column]}`;
+              const columnsData = Array.isArray(data1[column])
+                ? data1[column].join(",")
+                : "";
+              console.log(columnsData);
+              return `"${column}",${data1[column]}`;
+            }
           })
           .join("\n");
 

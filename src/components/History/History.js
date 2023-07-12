@@ -4,9 +4,10 @@ import "../../App.css";
 import Current from "./Current.js";
 import Temperature from "./Temperature.js";
 import Voltage from "./Voltage.js";
+import Speed from "./Speed.js";
 import worker_script from "./worker.js";
 import { Multiselect } from "multiselect-react-dropdown";
-import { FaPlus, FaMinus } from "react-icons/fa";
+import { FaPlus, FaMinus, FaSave, FaDownload } from "react-icons/fa";
 
 // import { Link } from "react-router-dom/cjs/react-router-dom.min";
 import { useState } from "react";
@@ -85,9 +86,7 @@ const AddNewOption = (props) => {
           position: "Right",
         }}
         onClick={handleClick}
-      >
-        <FaMinus />
-      </span>
+      ></span>
     </components.Option>
   );
 };
@@ -96,12 +95,49 @@ const AddNewOption = (props) => {
 export default function History() {
   const [current_time, setCurrent_time] = useState(start_time);
   const [save, setSave] = useState(false);
-  const [plot1topic, setplot1topic] = useState("default");
-  const [plot2topic, setplot2topic] = useState("default");
-  const [plot3topic, setplot3topic] = useState("default");
-  const [plot4topic, setplot4topic] = useState("default");
+  const [plot1topic, setplot1topic] = useState("Topic1");
+  const [plot2topic, setplot2topic] = useState("Topic2");
+  const [plot3topic, setplot3topic] = useState("Topic3");
+  const [plot4topic, setplot4topic] = useState("Topic4");
   const [selectedplot, setSelectedplot] = useState();
   const [selectedtopic, setSelectedtopic] = useState();
+  const [openDialog, handleDisplay] = React.useState(false);
+
+  const handleClose = () => {
+    handleDisplay(false);
+  };
+
+  const openDialogBox = () => {
+    handleDisplay(true);
+  };
+  const buttonStyle = {
+    width: "10rem",
+    fontsize: "1.5rem",
+    height: "2rem",
+    padding: "5px",
+    borderRadius: "10px",
+    backgroundColor: "green",
+    color: "White",
+    border: "2px solid yellow",
+  };
+  const divStyle = {
+    display: "flex",
+    felxDirection: "row",
+    position: "absolute",
+    right: "0px",
+    bottom: "0px",
+    // padding: "1rem",
+  };
+  const confirmButtonStyle = {
+    width: "5rem",
+    height: "1.5rem",
+    fontsize: "1rem",
+    backgroundColor: "grey",
+    color: "black",
+    margin: "5px",
+    borderRadius: "10px",
+    border: "1px solid black",
+  };
 
   const customStyles = {
     control: (provided, state) => ({
@@ -124,20 +160,17 @@ export default function History() {
   // Array of all options
 
   const saveHandler = () => {
-    setSave(!save);
-    if (save) {
-      var value1 = sessionStorage.getItem("allEntriest");
-      var value2 = sessionStorage.getItem("allEntriesc");
-      var value3 = sessionStorage.getItem("allEntriesv");
-      const data = {
-        column1: value1,
-        column2: value2,
-        column3: value3,
-      };
-      // console.log(data);
-      nonBlockingExport(data);
-      sessionStorage.clear();
-    }
+    var value1 = sessionStorage.getItem("allEntriest");
+    var value2 = sessionStorage.getItem("allEntriesc");
+    var value3 = sessionStorage.getItem("allEntriesv");
+    const data = {
+      column1: value1,
+      column2: value2,
+      column3: value3,
+    };
+    // console.log(data);
+    nonBlockingExport(data);
+    sessionStorage.clear();
   };
 
   const nonBlockingExport = (data) => {
@@ -211,9 +244,12 @@ export default function History() {
       else if (selectedplot.value == "2") setplot2topic(selectedtopic.value);
       else if (selectedplot.value == "3") {
         setplot3topic(selectedtopic.value);
-        console.log(plot3topic + "*");
+        // console.log(plot3topic + "*");
+      } else if (selectedplot.value == "4") {
+        setplot4topic(selectedtopic.value);
+        // console.log(plot3topic + "*");
       }
-      console.log(plot3topic + " " + selectedtopic.value);
+      // console.log(plot3topic + " " + selectedtopic.value);
       toast.success(
         `Plot ${selectedplot.value} added with ${selectedtopic.value}`,
         {
@@ -285,12 +321,11 @@ export default function History() {
           <div className="dropdown-container">
             <Select
               options={plotList}
-              placeholder="ex - 1"
+              placeholder=""
               value={selectedplot}
               onChange={handleSelectplot}
               styles={customStyles}
-
-              // isSearchable={true}
+              isSearchable={true}
               // isMulti
             />
           </div>
@@ -333,64 +368,98 @@ export default function History() {
           >
             Subscribe
           </Button>
+
+          <FaDownload onClick={saveHandler} />
+
           <ToastContainer />
         </div>
       </div>
-      <div className="multiselect">
-        {/* <Multiselect
-          isObject={false}
-          onRemove={(event) => {
-            // console.log(event);
 
-            map1.forEach((value, key) => {
-              // console.log(value);
-              // console.log(key);
-              var flag = false;
-              event.map((component, index) => {
-                if (key == event[index]) {
-                  flag = true;
-                  // console.log(event[index]);
-                }
-              });
-
-              map1.set(key, flag);
-            });
-          }}
-          onSelect={(event) => {
-            // console.log(event);
-            event.map((component, index) => {
-              map1.set(event[index], true);
-            });
-          }}
-          options={options}
-        /> */}
+      <div className="letter">
+        <h5>
+          Start Time:{" "}
+          {start_time.toLocaleString("en-US", {
+            dateStyle: "short",
+            timeStyle: "short",
+          })}
+        </h5>
+        <h5>
+          Current Time:{" "}
+          {current_time.toLocaleString("en-US", {
+            dateStyle: "short",
+            timeStyle: "short",
+          })}
+        </h5>
       </div>
 
-      <div className="time_heading letter">
-        <h5>Start Time : {start_time}</h5>
-        <h5>Current Time : {current_time}</h5>
+      <div>
+        {/* Button trigger modal */}
+        {/* <button
+          class="button button-33"
+          type="button"
+          data-bs-toggle="modal"
+          data-bs-target="exampleModal"
+        >
+          Launch demo modal
+        </button> */}
+        {/* Modal */}
+        <div
+          style={{ backgroundColor: "blanchedalmond" }}
+          className="modal fade"
+          id="exampleModal"
+          tabIndex={-1}
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5" id="exampleModalLabel">
+                  Modal title
+                </h1>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                />
+              </div>
+              <div className="modal-body">...</div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Close
+                </button>
+                <button type="button" className="btn btn-primary">
+                  Save changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <button class="button button-33" onClick={saveHandler}>
-        {save ? "Saving..." : "Save"}
-      </button>
 
-      <div className="plots">
-        {true ? (
+      <div className="plots-area">
+        <div className="plots">
           <Current message={plot1topic} />
-        ) : (
-          <div className="fokat"></div>
-        )}
-        {true ? (
+        </div>
+
+        <div className="plots">
           <Voltage message={plot2topic} />
-        ) : (
-          <div className="fokat"></div>
-        )}
+        </div>
       </div>
 
-      <div className="plots">
-        {true ? <Temperature message={plot3topic} /> : ""}
-        {/* <Temperature2 /> */}
-        {/* <DatavsData /> */}
+      <div className="plots-area">
+        <div className="plots">
+          <Temperature message={plot3topic} />
+        </div>
+
+        <div className="plots">
+          <Speed message={plot4topic} />
+        </div>
       </div>
       <br />
     </div>

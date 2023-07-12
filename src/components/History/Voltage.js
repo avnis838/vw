@@ -4,6 +4,7 @@ import Plot from "react-plotly.js";
 
 //for multithreading work is defined in worker.js
 import worker_script from "./worker.js";
+import { FaStop, FaStopCircle } from "react-icons/fa";
 
 //declaring mqtt client to subsscribe
 var mqtt = require("mqtt");
@@ -23,6 +24,8 @@ var start_time = Date(); // start is every time to refresh that instant first ti
 var countd = 50; //for default datas
 var count = 50;
 var ymax = 50;
+var width = 0.5;
+var width1 = 0.5;
 var allEntriesv = []; //default empty array containg data for csv file download
 
 var startingNumbers = Array(count)
@@ -39,6 +42,8 @@ const Voltage = (props) => {
   const [stop, setStop] = useState(true); // state to stop graph of voltage stop true means you can stop ie graph is running
   const [save, setSave] = useState(false); //state to save the datas in csv file and download it
   const [note, setNote] = useState("#"); // data indicator will container # till value is not comming
+  const [ymax, setymax] = useState(50);
+  const [ymin, setymin] = useState(-50);
 
   const [dataGraph, setDataGraph] = useState({
     // initialisation of dataGraph that will be shown in the graph
@@ -133,7 +138,7 @@ const Voltage = (props) => {
   };
 
   useEffect(() => {
-    const client = mqtt.connect("mqtt://192.168.1.18:9001", options); ////client specifications to connect to server
+    const client = mqtt.connect("mqtt://192.168.1.2:9001", options); ////client specifications to connect to server
     client.on("connect", () => {
       //connect done once when voltage compnent is refreshed
       console.log("connected");
@@ -146,6 +151,16 @@ const Voltage = (props) => {
       //an event listener function to be called when data of particular topic is received
       // note = message.toString();
       const itemMessage = message.toString();
+      width = width1 = parseFloat(dataGraph[count - 50]);
+      for (var i = countd - 50; i < countd; i++) {
+        var x = parseFloat(dataGraph[i]);
+        x = x > 0 ? x : x * -1;
+        width = Math.max(x, width);
+        width1 = Math.min(x, width1);
+
+        setymax(width);
+        setymin(-1 * width);
+      }
 
       if (stop) {
         setDataGraph((prev) => {
@@ -200,18 +215,82 @@ const Voltage = (props) => {
   // }, [data]);
 
   return (
-    <div className="temp">
-      <h1 className="title_head letter">
-        Perfomance {props.message} Dashboard
-      </h1>
-
-      <button className="button button-33" onClick={stopHandler}>
-        {stop ? "Stop" : "Run"}
-      </button>
-
-      <p>
-        {props.message} is: {note}mV
-      </p>
+    <div className="letter">
+      <div className="inputtopic">
+        <p className="inputtopic">
+          <span style={{ marginRight: "10px" }}>
+            {stop ? (
+              <FaStop style={{ color: "red" }} onClick={stopHandler} />
+            ) : (
+              <FaStopCircle onClick={stopHandler} />
+            )}
+          </span>
+          {props.message} is:{" "}
+          <span
+            style={{
+              fontWeight: "bold",
+              color: "whitesmoke",
+            }}
+          >
+            <div style={{ width: "100px" }}> {note}mA</div>
+          </span>{" "}
+          <div className="inputtopic" style={{ margin: "2px" }}>
+            <br />
+            <div className="inputtopic" style={{ margin: "2px" }}>
+              <label
+                className="form-label"
+                htmlFor="typeNumber2"
+                style={{ margin: "2px" }}
+              >
+                Y-Min
+              </label>
+              <div
+                className="form-outline"
+                style={{ width: "5rem", height: "1.5rem" }}
+              >
+                <input
+                  onChange={(event) =>
+                    event.target.value
+                      ? setymin(event.target.value)
+                      : setymin(0)
+                  }
+                  step="0.01"
+                  defaultValue="-50"
+                  type="number"
+                  id="typeNumber2"
+                  className="form-control"
+                />
+              </div>
+            </div>
+            <div className="inputtopic" style={{ margin: "10px" }}>
+              <label
+                className="form-label"
+                htmlFor="typeNumber1"
+                style={{ margin: "2px" }}
+              >
+                Y-Max
+              </label>
+              <div
+                className="form-outline"
+                style={{ width: "5rem", height: "1.5rem" }}
+              >
+                <input
+                  onChange={(event) =>
+                    event.target.value
+                      ? setymax(event.target.value)
+                      : setymax(0)
+                  }
+                  step="0.01"
+                  defaultValue="50"
+                  type="number"
+                  id="typeNumber1"
+                  className="form-control"
+                />
+              </div>
+            </div>
+          </div>
+        </p>
+      </div>
 
       <div className="plot">
         <Plot
@@ -235,7 +314,7 @@ const Voltage = (props) => {
 
             yaxis: {
               title: `${props.message} (mV)`,
-              range: [-16000, 16000],
+              range: [ymin, ymax],
               type: "linear",
             },
           }}
