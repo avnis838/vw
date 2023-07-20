@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 // import { useWorker, WORKER_STATUS } from "@koale/useworker";
 import "../../App.css";
 import Plot from "react-plotly.js";
-import worker_script from "./worker.js";
-import { FaStop, FaStopCircle } from "react-icons/fa";
-
+import worker_script from "../../worker.js";
+import { FaForward, FaStop, FaStopCircle } from "react-icons/fa";
+import { MaxPriorityQueue } from "@datastructures-js/priority-queue";
 // import Current from "./Current.js";
 
 var mqtt = require("mqtt");
@@ -21,7 +21,7 @@ var start_time = Date();
 
 var count = 50;
 var countd = 50;
-var allEntriesc = [];
+var allEntriess = [];
 var ymax = 50;
 
 var startingNumbers = Array(count)
@@ -116,7 +116,7 @@ const Speed = (props) => {
   const saveHandler = () => {
     setSave(!save);
     if (save) {
-      var data = sessionStorage.getItem("allEntriesc");
+      var data = sessionStorage.getItem("allEntriess");
       nonBlockingExport(data);
       sessionStorage.clear();
     }
@@ -128,7 +128,14 @@ const Speed = (props) => {
   }
 
   useEffect(() => {
-    const client = mqtt.connect("mqtt://192.168.1.2:9001", options);
+    const client = mqtt.connect(`mqtt://${props.server1}:${props.port1}`, {
+      keepalive: 60,
+      protocol: "ws",
+      username: `${props.username}`,
+      password: `${props.password}`,
+
+      clientId: "mqttjs_" + Math.random().toString(16).substr(2, 8),
+    });
     client.on("connect", () => {
       console.log("connected");
       console.log(`${props.message}`);
@@ -138,7 +145,8 @@ const Speed = (props) => {
     client.on("message", function (topic, message) {
       // note = message.toString();
       const itemMessage = message.toString();
-
+      const mpq = MaxPriorityQueue.fromArray(dataGraph.y);
+      setymax(mpq.front());
       // console.log(dataGraph.x.length);
       if (stop) {
         setDataGraph((prev) => {
@@ -154,11 +162,11 @@ const Speed = (props) => {
           };
         });
         setNote(itemMessage);
-        allEntriesc.push(itemMessage);
+        allEntriess.push(itemMessage);
         // allEntriesc.push(Date.now());
-        sessionStorage.setItem("allEntriesc", allEntriesc);
+        sessionStorage.setItem("allEntriess", allEntriess);
       } else {
-        allEntriesc.push("-");
+        allEntriess.push("-");
       }
 
       if (stop) setCurrent_time(Date());
@@ -168,33 +176,6 @@ const Speed = (props) => {
     };
   }, [stop, props]);
 
-  // useEffect(() => {
-  //   // if (data) {
-  //   const interval = setInterval(() => {
-  //     // console.log(data.x.length);
-  //     setDataGraph((prev) => {
-  //       return {
-  //         x: stop ? [...prev.x.slice(1), ++count] : [...prev.x],
-  //         y: stop ? [...prev.y.slice(1), data.y[count]] : [...prev.y],
-  //         mode: "lines+markers",
-  //       };
-  //     });
-
-  //     setData((prev) => {
-  //       return {
-  //         x: [...prev.x.slice(1)],
-  //         y: [...prev.y.slice(1)],
-  //         // mode: "lines+markers",
-  //       };
-  //     });
-  //     setNote(data.y[count]);
-  //   }, 50);
-
-  //   // console.log("ererter");
-  //   return () => clearInterval(interval);
-  //   // }
-  // }, [data]);
-
   return (
     <div className="letter">
       <div className="inputtopic">
@@ -203,7 +184,7 @@ const Speed = (props) => {
             {stop ? (
               <FaStop style={{ color: "red" }} onClick={stopHandler} />
             ) : (
-              <FaStopCircle onClick={stopHandler} />
+              <FaForward onClick={stopHandler} />
             )}
           </span>
           {props.message} is:{" "}
@@ -230,7 +211,9 @@ const Speed = (props) => {
                 style={{ width: "5rem", height: "1.5rem" }}
               >
                 <input
-                  onChange={(event) => setymin(event.target.value)}
+                  onChange={(event) => {
+                    stop == 0 && setymin(event.target.value);
+                  }}
                   step="0.01"
                   defaultValue="-50"
                   type="number"
@@ -252,7 +235,9 @@ const Speed = (props) => {
                 style={{ width: "5rem", height: "1.5rem" }}
               >
                 <input
-                  onChange={(event) => setymax(event.target.value)}
+                  onChange={(event) => {
+                    stop == 0 && setymax(event.target.value);
+                  }}
                   step="0.01"
                   defaultValue="50"
                   type="number"
@@ -288,7 +273,7 @@ const Speed = (props) => {
             yaxis: {
               title: `${props.message} (mA)`,
 
-              range: [ymin, ymax],
+              range: [stop ? -1 * ymax - 1 : ymin, stop ? ymax + 1 : ymax],
               type: "area",
             },
 

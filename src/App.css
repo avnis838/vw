@@ -126,9 +126,7 @@
   }
 }
 
-
-
-
+/*             subscribe-button */
 
 .button {
   margin: 200;
@@ -516,7 +514,7 @@
   border: 1px solid #ccc;
 }
 
-/* /////////////// */
+/* ////////splash             screen/////// */
 
 .splash-screen {
   /* padding: 100px; */
@@ -538,7 +536,7 @@
   animation-duration: 1.2s;
 }
 
-/* //loadinglogo */
+/* //loading       logo */
 
 .circle {
   height: 40px;
@@ -614,13 +612,13 @@
   0% {
     padding-top: 20px;
     left: -90px;
-    height: 10px;
+    /* height: 10px; */
     /* background-color: #7abb01; */
     color: #7cf669;
   }
 
   50% {
-    height: 10px;
+    /* height: 10px; */
     /* background-color: #7abb01; */
     color: #7cf669;
   }
@@ -628,8 +626,15 @@
   100% {
     padding-top: 20px;
     left: 90px;
-    height: 10px;
+    /* height: 10px; */
     /* background-color: #7abb01; */
     color: #7cf669;
   }
+}
+
+
+/* download icon */
+.download:hover {
+  cursor: pointer;
+  color: darkorange;
 }

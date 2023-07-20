@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 // import { useWorker, WORKER_STATUS } from "@koale/useworker";
 import "../../App.css";
 import Plot from "react-plotly.js";
-import worker_script from "./worker.js";
-import { FaStop, FaStopCircle } from "react-icons/fa";
+import worker_script from "../../worker.js";
+import { FaForward, FaStop, FaStopCircle } from "react-icons/fa";
+import { MaxPriorityQueue } from "@datastructures-js/priority-queue";
 
 // import Current from "./Current.js";
 
@@ -11,8 +12,8 @@ var mqtt = require("mqtt");
 var options = {
   keepalive: 60,
   protocol: "ws",
-  username: "ZARVIS.2.4G",
-  password: "qwertyuiop",
+  username: "No Ddata",
+  password: "9135453595",
 
   clientId: "mqttjs_" + Math.random().toString(16).substr(2, 8),
 };
@@ -25,6 +26,7 @@ var allEntriesc = [];
 var ymax = 50;
 var width = 0.5;
 
+//variable initialisation with first 50 whole numbers
 var startingNumbers = Array(count)
   .fill(1)
   .map((_, i) => i);
@@ -32,8 +34,12 @@ var startingNumbers = Array(count)
 var startingNumbersy = Array(ymax)
   .fill(1)
   .map((_, i) => i);
+
+//creating object of the worker script
 const myWorker = new Worker(worker_script, { type: "module" });
+
 const Current = (props) => {
+  //usestate variables
   const [stop, setStop] = useState(true);
   const [save, setSave] = useState(false);
   const [note, setNote] = useState("#");
@@ -52,99 +58,35 @@ const Current = (props) => {
   });
   const [current_time, setCurrent_time] = useState(start_time);
 
+  //function handlers
   const stopHandler = () => {
     setStop(!stop);
   };
 
-  const nonBlockingExport = (data) => {
-    // clickStart = new Date().getTime();
-    getCSV(data);
-  };
-  const getCSV = (data) => {
-    console.log("Formatting csv...");
-    workerMaker("csvFormat", data);
-  };
-
-  const getBlob = (csvFile) => {
-    console.log("creating blob...");
-    workerMaker("blobber", csvFile);
-  };
-  const workerMaker = (type, arg) => {
-    // check if a Worker has been defined before calling postMessage with specified arguments
-    if (window.Worker) {
-      myWorker.postMessage({ type, arg });
-    }
-  };
-
-  const saveFile = (blob) => {
-    const uniqTime = new Date().getTime();
-    const filename = `my_file_${uniqTime}`;
-    if (navigator.msSaveBlob) {
-      // IE 10+
-      console.info("Starting call for " + "ie download");
-      const ieFilename = `${filename}.csv`;
-      navigator.msSaveBlob(blob, ieFilename);
-    } else {
-      console.info(`Starting call for html5 download`);
-      const link = document.createElement("a");
-      if (link.download !== undefined) {
-        // feature detection
-        // Browsers that support HTML5 download attribute
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", filename);
-        link.style.visibility = "hidden";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    }
-  };
-
-  myWorker.onmessage = function (e) {
-    console.log("Message received from worker");
-    const response = e.data;
-    const data = response.data;
-    const type = response.type;
-    if (type === "csvFormat") {
-      getBlob(data);
-    } else if (type === "blobber") {
-      saveFile(data);
-    } else {
-      console.error("An Invalid type has been passed in");
-    }
-  };
-  const saveHandler = () => {
-    setSave(!save);
-    if (save) {
-      var data = sessionStorage.getItem("allEntriesc");
-      nonBlockingExport(data);
-      sessionStorage.clear();
-    }
-  };
-
   useEffect(() => {
-    const client = mqtt.connect("mqtt://192.168.1.2:9001", options);
-    client.on("connect", () => {
-      console.log("connected");
-      // console.log(`${props.message}`);
-      client.subscribe(`${props.message}`);
-      // client.subscribe("mqtt/topic1");
+    const client = mqtt.connect(`mqtt://${props.server1}:${props.port1}`, {
+      keepalive: 60,
+      protocol: "ws",
+      username: `${props.username}`,
+      password: `${props.password}`,
+
+      clientId: "mqttjs_" + Math.random().toString(16).substr(2, 8),
     });
+    if (stop) {
+      client.on("connect", () => {
+        console.log("connected");
+        // console.log(`${props.message}`);
+        client.subscribe(`${props.message}`);
+        // client.subscribe("mqtt/topic1");
+      });
+    }
     client.on("message", function (topic, message) {
       // note = message.toString();
       const itemMessage = message.toString();
 
-      for (var i = countd; i < 50 + countd; i++) {
-        var x = parseInt(dataGraph[i]);
-        x = x > 0 ? x : x * -1;
-        width = Math.max(x, width);
+      const mpq = MaxPriorityQueue.fromArray(dataGraph.y);
+      setymax(mpq.front());
 
-        setymax(width);
-        // setymin(-1 * width);
-      }
-
-      // console.log(dataGraph.x.length);
       if (stop) {
         setDataGraph((prev) => {
           // Specify the maximum range of values on the y-axis
@@ -169,36 +111,12 @@ const Current = (props) => {
       if (stop) setCurrent_time(Date());
     });
     return () => {
+      client.on("connect", () => {
+        client.unsubscribe(`${props.message}`);
+      });
       client.end();
     };
   }, [stop, props]);
-
-  // useEffect(() => {
-  //   // if (data) {
-  //   const interval = setInterval(() => {
-  //     // console.log(data.x.length);
-  //     setDataGraph((prev) => {
-  //       return {
-  //         x: stop ? [...prev.x.slice(1), ++count] : [...prev.x],
-  //         y: stop ? [...prev.y.slice(1), data.y[count]] : [...prev.y],
-  //         mode: "lines+markers",
-  //       };
-  //     });
-
-  //     setData((prev) => {
-  //       return {
-  //         x: [...prev.x.slice(1)],
-  //         y: [...prev.y.slice(1)],
-  //         // mode: "lines+markers",
-  //       };
-  //     });
-  //     setNote(data.y[count]);
-  //   }, 50);
-
-  //   // console.log("ererter");
-  //   return () => clearInterval(interval);
-  //   // }
-  // }, [data]);
 
   return (
     <div className="letter">
@@ -208,7 +126,7 @@ const Current = (props) => {
             {stop ? (
               <FaStop style={{ color: "red" }} onClick={stopHandler} />
             ) : (
-              <FaStopCircle onClick={stopHandler} />
+              <FaForward onClick={stopHandler} />
             )}
           </span>
           {props.message} is:{" "}
@@ -235,7 +153,9 @@ const Current = (props) => {
                 style={{ width: "5rem", height: "1.5rem" }}
               >
                 <input
-                  // onChange={(event) => setymin(event.target.value)}
+                  onChange={(event) => {
+                    stop == 0 && setymin(event.target.value);
+                  }}
                   step="0.01"
                   defaultValue="-50"
                   type="number"
@@ -257,7 +177,9 @@ const Current = (props) => {
                 style={{ width: "5rem", height: "1.5rem" }}
               >
                 <input
-                  // onChange={(event) => setymax(event.target.value)}
+                  onChange={(event) => {
+                    stop == 0 && setymax(event.target.value);
+                  }}
                   step="0.01"
                   defaultValue="50"
                   type="number"
@@ -293,33 +215,9 @@ const Current = (props) => {
             yaxis: {
               title: `${props.message} (mA)`,
 
-              range: [-1 * ymax, ymax],
+              range: [stop ? -1 * ymax - 1 : ymin, stop ? ymax + 1 : ymax],
               type: "linear",
             },
-
-            // xaxis: {
-            //   autorange: true,
-            //   range: [countd - 50, countd],
-            //   rangeselector: {
-            //     buttons: [
-            //       {
-            //         count: 1,
-            //         label: "10",
-            //         step: 10,
-            //         stepmode: "backward",
-            //       },
-            //       {
-            //         count: 6,
-            //         label: "50",
-            //         step: 50,
-            //         stepmode: "backward",
-            //       },
-            //       { step: countd },
-            //     ],
-            //   },
-            //   rangeslider: { range: [0, countd] },
-            //   type: "linear",
-            // },
           }}
         />
       </div>

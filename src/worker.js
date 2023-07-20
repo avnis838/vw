@@ -1,9 +1,3 @@
-// worker.js
-// import api from "./testModule";
-// import React, { useEffect } from "react";
-// import { CSVLink } from "react-csv";
-// import d3 from "d3";
-
 const workercode = () => {
   // if ("function" === typeof importScripts) {
   // importScripts("https://cdnjs.cloudflare.com/ajax/libs/d3/4.8.0/d3.min.js");
@@ -24,32 +18,28 @@ const workercode = () => {
         break;
       case "blobber":
         //
-        const data1 = {
-          Temperature: arg["column1"], // Array for column 1
-          Current: arg["column2"], // Array for column 2
-          Voltage: arg["column3"], // Array for column 3
-        };
+        var data1 = [];
+
+        if (arg["column1"] !== undefined) {
+          data1 = { ...data1, Topic1: arg["column1"] };
+        }
+        if (arg["column2"] !== undefined) {
+          data1 = { ...data1, Topic2: arg["column2"] };
+        }
+        if (arg["column3"] !== undefined) {
+          data1 = { ...data1, Topic3: arg["column3"] };
+        }
 
         console.log(data1);
         // Get the keys (column names) from the data object
         const columns = Object.keys(data1);
 
-        // Create an array of arrays where each inner array represents a column
-        // const columnsData = columns.map((column) => data[`${column}`]);
-
-        // Create the CSV content
-        // console.log(arg["column1"].length);
         const csvContent = columns
           .map((column) => {
-            if (column == "Temperature") {
-              console.log(data1[column]);
-
-              const columnsData = Array.isArray(data1[column])
-                ? data1[column].join(",")
-                : "";
-              console.log(columnsData);
-              return `"${column}",${data1[column]}`;
-            }
+            const columnData = Array.isArray(data1[column])
+              ? data1[column]
+              : [data1[column]];
+            return `"${column}",${columnData.join("\n")}`;
           })
           .join("\n");
 
@@ -67,7 +57,7 @@ const workercode = () => {
         });
         break;
       default:
-        console.error("invalid type passed in");
+        console.error("Invalid type passed in");
         break;
     }
   };
