@@ -1,4 +1,7 @@
+///this file is just for fun starting page needs improvement
+
 import React, { Component } from "react";
+
 // import auth0Client from "../Auth";
 import "../App.css";
 

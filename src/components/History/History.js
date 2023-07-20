@@ -36,50 +36,27 @@ var addoption = "";
 const myWorker = new Worker(worker_script, { type: "module" });
 
 export default function History() {
+  //for setting time
   const [current_time, setCurrent_time] = useState(start_time);
+
+  //for choosing plotno vs plot topic
 
   const [plot1topic, setplot1topic] = useState("Topic1");
   const [plot2topic, setplot2topic] = useState("Topic2");
   const [plot3topic, setplot3topic] = useState("Topic3");
   const [plot4topic, setplot4topic] = useState("Topic4");
+
+  //at time of selecting topic and plot no
   const [selectedplot, setSelectedplot] = useState();
   const [selectedtopic, setSelectedtopic] = useState();
+
+  ////
   const [server1, setServer] = useState("192.168.1.17");
   const [port1, setPort] = useState("9001");
   const [wifi, setWifi] = useState("ZARVIS.2.4G");
   const [password, setPassword] = useState("qwertyuiop");
 
-  function downloadCSV() {
-    // Retrieve arrays from sessionStorage
-    const array1 = sessionStorage.getItem("allEntriesc");
-    const array2 = sessionStorage.getItem("allEntriesv");
-    const array3 = sessionStorage.getItem("allEntriest");
-    console.log(array1);
-    // Create an array of objects representing the rows
-    const rows = array1.forEach((item, index) => ({
-      column1: item,
-      column2: array2[index],
-      column3: array3[index],
-    }));
-
-    // Convert the array of objects to a CSV string
-    const csvContent = rows
-      .map((row) => Object.values(row).join(","))
-      .join("\n");
-
-    // Create a Blob with the CSV data
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-    // Create a temporary anchor element for downloading
-    const anchor = document.createElement("a");
-    anchor.href = URL.createObjectURL(blob);
-    anchor.download = "data.csv";
-
-    // Simulate a click on the anchor element to trigger download
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-  }
+  //custom style for plot no and topic list
 
   const customStyles = {
     control: (provided, state) => ({
@@ -101,6 +78,7 @@ export default function History() {
 
   // Array of all options
 
+  //for downloading the csv format data
   const saveHandler = () => {
     if (
       plot1topic === "Topic1" &&
@@ -198,6 +176,8 @@ export default function History() {
     }
   };
 
+  //error checks  toast notification
+
   const showToastMessage = () => {
     if (selectedplot == null || selectedtopic == null) {
       toast.error(`Both Plot and topic should be selected`, {
@@ -221,6 +201,8 @@ export default function History() {
     }
   };
 
+  //function to dynamically select plotno
+
   function handleSelectplot(data) {
     if (data.value) setSelectedplot(data);
     else {
@@ -230,16 +212,22 @@ export default function History() {
     }
   }
 
+  /////function to dynamically select plot topic
+
   function handleSelecttopic(data) {
     console.log(data.value);
     if (data.value) setSelectedtopic(data);
   }
+
+  //add button to topics list
 
   const handleAddButtonClick = () => {
     topicList.push(addoption);
     showAddButton = false;
     addoption = "";
   };
+
+  //if there is no topics as typed then add button will appear
 
   const handleInputChange = (inputValue) => {
     if (!inputValue) {
@@ -251,6 +239,7 @@ export default function History() {
     }
   };
 
+  //setting dynamic time interval
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent_time(Date());
@@ -260,6 +249,8 @@ export default function History() {
       clearInterval(interval);
     };
   }, []);
+
+  ////////////rest is what you can see on the page
 
   return (
     <div className="">

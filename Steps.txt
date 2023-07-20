@@ -1,0 +1,21 @@
+Download the folder from github
+//Installing Node.js
+
+Go to Link 
+https://nodejs.org/en
+
+Download the suitable version of Node.js
+
+then add the path of ../nodejs/ in user Environment Variables.
+
+
+//Make sure your system has nodejs installed first
+1. Do npm install
+2. then do npm start
+Application will be on your screen
+
+Mobile screen might not be able to grab the plot completely due to library inbuilt of plotly.js
+
+package.json contains all the packages/ dependencies for various purposes.
+
+To make New plot You will need to make new file similar as Temperature.js then import that file in History.js and next to <Speed/> Add the new file Component.
